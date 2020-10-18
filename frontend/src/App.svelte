@@ -17,6 +17,8 @@
         <h5>Hinweis</h5>
         Bitte Hygienehinweise beachten!
     </Alert>
+
+    <h4 class="heading mt-8 ml-1 mb-1">Termine</h4>
     <EventAccordion events={events} />
     <TheFooter />
 </MaterialApp>

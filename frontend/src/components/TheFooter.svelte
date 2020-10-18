@@ -2,7 +2,7 @@
   import { Footer } from 'svelte-materialify/src';
 </script>
 
-<Footer class="justify-left pa-2 green" absolute>
+<Footer class="justify-left pa-2 light-green darken-2" absolute>
     <span class="version">v1.0.0-preview</span>
 </Footer>
 

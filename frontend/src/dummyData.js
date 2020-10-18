@@ -1,25 +1,35 @@
 export const testEvents = [
   {
-    time: "1603034348156",
+    id: 1,
+    time: 1603034348156,
     maxParticipants: 15,
     inCharge: "Simon",
     participants: [
       {
         name: "Hans",
-        timePreference: "1603034348156"
+        timePreference: 1603034348156,
+        waiting: false
       },
       {
         name: "Peter",
-        timePreference: "1603034348156"
+        timePreference: 1603034348156,
+        waiting: false
       },
       {
-        name: "Hans L.",
-        timePreference: "1603034348156"
+        name: "Hans LangerNachname",
+        timePreference: 1603034348156,
+        waiting: false,
+      },
+      {
+        name: "Waiter",
+        timePreference: 1603034348156,
+        waiting: true,
       }
     ]
   },
   {
-    time: "1603034348156",
+    id: 2,
+    time: 1603034348156,
     maxParticipants: 10,
     inCharge: "Simon",
     participants: [
