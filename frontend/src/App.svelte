@@ -1,30 +1,29 @@
 <script>
-	export let name;
+  import {MaterialApp} from 'svelte-materialify';
+  import {Alert} from 'svelte-materialify/src';
+  import TheAppBar from "./components/TheAppBar.svelte";
+  import TheFooter from "./components/TheFooter.svelte";
+  import EventAccordion from "./components/EventAccordion.svelte";
+
+  import {testEvents} from './dummyData';
+  let events = testEvents;
+
+  const theme = "light";
 </script>
 
-<main>
-	<h1>Hello {name}!</h1>
-	<p>Visit the <a href="https://svelte.dev/tutorial">Svelte tutorial</a> to learn how to build Svelte apps.</p>
-</main>
+<MaterialApp {theme}>
+    <TheAppBar />
+    <Alert class="info-alert blue white-text ma-2" border="left" dense>
+        <h5>Hinweis</h5>
+        Bitte Hygienehinweise beachten!
+    </Alert>
+    <EventAccordion events={events} />
+    <TheFooter />
+</MaterialApp>
+
 
 <style>
-	main {
-		text-align: center;
-		padding: 1em;
-		max-width: 240px;
-		margin: 0 auto;
-	}
-
-	h1 {
-		color: #ff3e00;
-		text-transform: uppercase;
-		font-size: 4em;
-		font-weight: 100;
-	}
-
-	@media (min-width: 640px) {
-		main {
-			max-width: none;
-		}
-	}
+    .info-alert {
+        margin: 15px;
+    }
 </style>
