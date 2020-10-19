@@ -1,8 +1,9 @@
 <script>
-  import { createEventDispatcher } from 'svelte'
+  import { createEventDispatcher, afterUpdate } from 'svelte'
+  import {readCookie} from "../CookieHelper";
   import ExpansionPanels, {ExpansionPanel} from 'svelte-materialify/src/components/ExpansionPanels';
   import {Button, Icon} from 'svelte-materialify/src';
-  import {mdiAccountArrowRight, mdiAccountGroup} from '@mdi/js';
+  import {mdiAccountArrowRight, mdiAccountGroup, mdiLogout} from '@mdi/js';
   import ParticipantChip from "./ParticipantChip.svelte";
   import format from "date-fns/format";
   import {de} from "date-fns/locale";
@@ -26,10 +27,16 @@
   let registerEventTime = new Date();
 
   const handleRegisterClick = (event) => {
-    registerEventId = event.id;
-    registerEventName = formatDateTime(event.time);
-    registerEventTime = new Date(event.time);
-    registerDialogVisible = true;
+    if (!isUserRegistered(event.participants, userinfo.name)){
+      // register user
+      registerEventId = event.id;
+      registerEventName = formatDateTime(event.time);
+      registerEventTime = new Date(event.time);
+      registerDialogVisible = true;
+    }else {
+      // remove registration
+      deregisterUser(event)
+    }
   };
   const registerUser = (event) => {
     dispatch("register", {
@@ -38,13 +45,34 @@
     })
 
     registerDialogVisible = false;
+  };
+  const deregisterUser = event => {
+    dispatch("deregister", {
+      eventId: event.id,
+      userId: userinfo.userid
+    })
   }
+
+  const isUserRegistered = (participants) => {
+    return participants.find(p => p.userid === userinfo.userid) !== undefined;
+  }
+
+  let userinfo = {name: "", email: ""};
+  afterUpdate(async () => {
+    const cookie = readCookie("userinfo");
+    if (cookie !== "") {
+      // userinfo cookie exists
+      userinfo = JSON.parse(cookie);
+    }
+  });
 
   export let events;
 </script>
 
 
 <RegisterDialog
+        defaultName={userinfo.name}
+        defaultEmail={userinfo.email}
         eventName={registerEventName}
         eventTime={registerEventTime}
         active={registerDialogVisible}
@@ -65,9 +93,17 @@
             <div class="d-flex flex-column" style="width: 100%">
                 <div style="width: 100%">
                     <h6 class="heading float-left">Teilnehmer</h6>
-                    <Button size="small" class=" mt-1 float-right light-green lighten-2" on:click={() => handleRegisterClick(event)}>
-                        <Icon size="20px" path={mdiAccountArrowRight} class="mr-1"/>
-                        Registrieren
+                    <Button
+                            size="small"
+                            class={
+                                (isUserRegistered(event.participants) ?
+                                "mt-1 float-right red lighten-1" :
+                                "mt-1 float-right light-green lighten-2")
+                            }
+                            on:click={() => handleRegisterClick(event)}
+                    >
+                        <Icon size="20px" path={isUserRegistered(event.participants) ? mdiLogout : mdiAccountArrowRight} class="mr-1"/>
+                        {isUserRegistered(event.participants) ? "Abmelden" : "Registrieren"}
                     </Button>
                 </div>
                 <div class="mt-3">

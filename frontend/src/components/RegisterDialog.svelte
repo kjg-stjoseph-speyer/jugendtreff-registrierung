@@ -13,6 +13,8 @@
   export let active;
   export let eventName;
   export let eventTime;
+  export let defaultName = "";
+  export let defaultEmail = "";
 
   // field verification
   const nameRules = [(v) => !!v || 'Pflichtangabe!', (v) => v.length <= 25 || 'Max. 25 Buchstaben'];
@@ -36,6 +38,8 @@
 
   $: {
     time = eventTime;
+    name = defaultName;
+    email = defaultEmail;
   }
 
  const handleSubmit = () => {
