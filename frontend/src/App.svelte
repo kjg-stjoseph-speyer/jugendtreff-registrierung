@@ -7,11 +7,14 @@
   import {writeCookie, readCookie} from './CookieHelper';
   import {testEvents} from './dummyData';
   import TheNavigationDrawer from "./components/TheNavigationDrawer.svelte";
+  import AdminLoginDialog from "./components/AdminLoginDialog.svelte";
+  import {afterUpdate} from "svelte";
 
   let events = testEvents;
 
   const theme = "light";
 
+  let showAdminDialog = false;
   let showDrawer = false;
   let expandedEventIndex = 0;
 
@@ -75,6 +78,32 @@
     // trigger reactivity
     events = events;
   };
+
+  const handleAdminClick = () => {
+    if (admin) {
+      // delete cookie to log out
+      writeCookie("admin", "", 365)
+    }else {
+      // no admin -> show login dialog
+      showAdminDialog = true;
+    }
+    showDrawer = false;
+  };
+
+  const handleAdminLogin = password => {
+    // TODO: check credentials using API
+
+    if (password === "123456") {
+      writeCookie("admin", password, 365);
+    }
+
+    showAdminDialog = false;
+  };
+
+  let admin = false;
+  afterUpdate(async () => {
+    admin = readCookie("admin") !== "";
+  });
 </script>
 
 <MaterialApp {theme}>
@@ -96,11 +125,16 @@
               expandedEventIndex = events.findIndex(ev => ev.id === e.detail.eventId);
               showDrawer = false;
             }}
-            on:adminclick={() => console.log("ADMIN LOGIN")}
+            on:adminclick={() => handleAdminClick()}
             events={events}
             show={showDrawer}
     />
     <Overlay index={1} active={showDrawer} on:click={() => showDrawer = false}/>
+    <AdminLoginDialog
+            show={showAdminDialog}
+            on:cancel={() => showAdminDialog = false}
+            on:login={e => handleAdminLogin(e.detail.password)}
+    />
     <TheFooter />
 </MaterialApp>
 

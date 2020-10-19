@@ -1,9 +1,10 @@
 <script>
   import { NavigationDrawer, List, ListItem, Icon } from 'svelte-materialify/src';
-  import {mdiCalendar, mdiAccountCowboyHat, mdiShieldAccount} from '@mdi/js';
+  import {mdiCalendar, mdiAccountCowboyHat} from '@mdi/js';
   import format from "date-fns/format";
   import {de} from "date-fns/locale";
-  import { createEventDispatcher } from 'svelte'
+  import {afterUpdate, createEventDispatcher} from 'svelte'
+  import {readCookie} from "../CookieHelper";
 
   const dispatch = createEventDispatcher();
 
@@ -11,6 +12,11 @@
   const formatDateTime = timestamp => {
     return format(new Date(timestamp), 'd.M. HH:mm', {locale: de}) + " Uhr";
   };
+
+  let admin = false;
+  afterUpdate(async () => {
+    admin = readCookie("admin") !== "";
+  });
 
   export let show = false;
   export let events = [];
@@ -36,7 +42,7 @@
                 <span slot="prepend">
                     <Icon path={mdiAccountCowboyHat}/>
                 </span>
-                    Admin Login
+                    Admin {admin ? "Abmelden" : "Anmeldung"}
             </ListItem>
             <ListItem on:click={() => window.location.href = "http://kjg-stjoseph-speyer.de/datenschutzerklaerung.html"}>
                     Datenschutzerklärung
