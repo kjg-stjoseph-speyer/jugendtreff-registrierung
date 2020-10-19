@@ -9,6 +9,31 @@
   let events = testEvents;
 
   const theme = "light";
+
+  // called when user requests registration on an event
+  const handleRegistration = info => {
+    console.log(info);
+
+    // TODO: register using API
+    // for now just add the changes locally
+
+    // get event by id
+    const eventToUpdateIndex = events.findIndex(e => e.id === info.eventId);
+    const eventToUpdate = events[eventToUpdateIndex];
+    const isWaiting = eventToUpdate.participants.length >= eventToUpdate.maxParticipants;
+
+    // check for duplicate name
+    if (!eventToUpdate.participants.find(p => p.name === info.name)){
+      eventToUpdate.participants = [...eventToUpdate.participants, {name: info.name, timePreference: info.time.getTime(), waiting: isWaiting}]
+      events.splice(eventToUpdateIndex, 1, eventToUpdate);
+
+      // trigger reactivity
+      events = events;
+    }else {
+      console.log("Duplicate")
+    }
+
+  };
 </script>
 
 <MaterialApp {theme}>
@@ -19,7 +44,10 @@
     </Alert>
 
     <h4 class="heading mt-8 ml-1 mb-1">Termine</h4>
-    <EventAccordion events={events} />
+    <EventAccordion
+            on:register={e => handleRegistration(e.detail)}
+            events={events}
+    />
     <TheFooter />
 </MaterialApp>
 

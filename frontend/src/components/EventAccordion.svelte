@@ -1,25 +1,56 @@
 <script>
+  import { createEventDispatcher } from 'svelte'
   import ExpansionPanels, {ExpansionPanel} from 'svelte-materialify/src/components/ExpansionPanels';
   import {Button, Icon} from 'svelte-materialify/src';
   import {mdiAccountArrowRight, mdiAccountGroup} from '@mdi/js';
   import ParticipantChip from "./ParticipantChip.svelte";
   import format from "date-fns/format";
   import {de} from "date-fns/locale";
+  import RegisterDialog from "./RegisterDialog.svelte";
+
+  const dispatch = createEventDispatcher();
 
   // returns number of waiting participants in list
   const countWaiting = participants => {
     return participants.filter(p => p.waiting).length;
-  }
+  };
 
   // format a unix timestamp to date/time string
   const formatDateTime = timestamp => {
     return format(new Date(timestamp), 'EEEE d. MMM. HH:mm', {locale: de}) + " Uhr";
+  };
+
+  let registerDialogVisible = false;
+  let registerEventId = -1;
+  let registerEventName = "";
+  let registerEventTime = new Date();
+
+  const handleRegisterClick = (event) => {
+    registerEventId = event.id;
+    registerEventName = formatDateTime(event.time);
+    registerEventTime = new Date(event.time);
+    registerDialogVisible = true;
+  };
+  const registerUser = (event) => {
+    dispatch("register", {
+      ...event.detail,
+      eventId: registerEventId
+    })
+
+    registerDialogVisible = false;
   }
 
   export let events;
 </script>
 
 
+<RegisterDialog
+        eventName={registerEventName}
+        eventTime={registerEventTime}
+        active={registerDialogVisible}
+        on:cancel={() => registerDialogVisible = false}
+        on:save={registerUser}
+/>
 <ExpansionPanels accordion>
     {#each events as event (event.id)}
         <ExpansionPanel>
@@ -34,7 +65,7 @@
             <div class="d-flex flex-column" style="width: 100%">
                 <div style="width: 100%">
                     <h6 class="heading float-left">Teilnehmer</h6>
-                    <Button size="small" class=" mt-1 float-right light-green lighten-2">
+                    <Button size="small" class=" mt-1 float-right light-green lighten-2" on:click={() => handleRegisterClick(event)}>
                         <Icon size="20px" path={mdiAccountArrowRight} class="mr-1"/>
                         Registrieren
                     </Button>
