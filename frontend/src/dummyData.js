@@ -38,5 +38,13 @@ export const testEvents = [
     inCharge: "Simon",
     participants: [
     ]
+  },
+  {
+    id: 3,
+    time: 1603034348156,
+    maxParticipants: 10,
+    inCharge: "Simon",
+    participants: [
+    ]
   }
 ]

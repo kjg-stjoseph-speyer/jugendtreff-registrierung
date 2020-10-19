@@ -66,7 +66,14 @@
     }
   });
 
+  let accordionShow = [0];
+
+  $: {
+    accordionShow = [expandedIndex];
+  }
+
   export let events;
+  export let expandedIndex = 0;
 </script>
 
 
@@ -79,7 +86,7 @@
         on:cancel={() => registerDialogVisible = false}
         on:save={registerUser}
 />
-<ExpansionPanels accordion>
+<ExpansionPanels accordion bind:value={accordionShow}>
     {#each events as event (event.id)}
         <ExpansionPanel>
             <div slot="header" class="d-flex flex-column">

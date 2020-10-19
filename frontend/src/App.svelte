@@ -1,14 +1,19 @@
 <script>
   import {MaterialApp} from 'svelte-materialify';
-  import {Alert} from 'svelte-materialify/src';
+  import {Alert, Overlay} from 'svelte-materialify/src';
   import TheAppBar from "./components/TheAppBar.svelte";
   import TheFooter from "./components/TheFooter.svelte";
   import EventAccordion from "./components/EventAccordion.svelte";
   import {writeCookie, readCookie} from './CookieHelper';
   import {testEvents} from './dummyData';
+  import TheNavigationDrawer from "./components/TheNavigationDrawer.svelte";
+
   let events = testEvents;
 
   const theme = "light";
+
+  let showDrawer = false;
+  let expandedEventIndex = 0;
 
   // called when user requests registration on an event
   const handleRegistration = info => {
@@ -24,7 +29,7 @@
       // create cookie
       const userid = Math.floor(Math.random() * (99999999 - 10000000 + 1)) + 10000000;
       userinfo = {name: info.name, email: info.email, userid: userid};
-    }else {
+    } else {
       // update cookie
       userinfo = JSON.parse(saved);
       userinfo.name = info.name;
@@ -42,15 +47,15 @@
     const isWaiting = eventToUpdate.participants.length >= eventToUpdate.maxParticipants;
 
     // check for duplicate name
-    if (!eventToUpdate.participants.find(p => p.name === info.name)){
+    if (!eventToUpdate.participants.find(p => p.name === info.name)) {
       eventToUpdate.participants = [...eventToUpdate.participants,
-            {name: info.name, timePreference: info.time.getTime(), userid: userinfo.userid, waiting: isWaiting}
-        ]
+        {name: info.name, timePreference: info.time.getTime(), userid: userinfo.userid, waiting: isWaiting}
+      ]
       events.splice(eventToUpdateIndex, 1, eventToUpdate);
 
       // trigger reactivity
       events = events;
-    }else {
+    } else {
       console.log("Duplicate")
     }
 
@@ -73,7 +78,7 @@
 </script>
 
 <MaterialApp {theme}>
-    <TheAppBar />
+    <TheAppBar on:showdrawer={() => showDrawer = !showDrawer}/>
     <Alert class="info-alert blue white-text ma-2" border="left" dense>
         <h5>Hinweis</h5>
         Bitte Hygienehinweise beachten!
@@ -84,7 +89,18 @@
             on:register={e => handleRegistration(e.detail)}
             on:deregister={e => handleDeregistration(e.detail)}
             events={events}
+            expandedIndex={expandedEventIndex}
     />
+    <TheNavigationDrawer
+            on:eventclick={e => {
+              expandedEventIndex = events.findIndex(ev => ev.id === e.detail.eventId);
+              showDrawer = false;
+            }}
+            on:adminclick={() => console.log("ADMIN LOGIN")}
+            events={events}
+            show={showDrawer}
+    />
+    <Overlay index={1} active={showDrawer} on:click={() => showDrawer = false}/>
     <TheFooter />
 </MaterialApp>
 
