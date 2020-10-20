@@ -9,14 +9,21 @@
   import TheNavigationDrawer from "./components/TheNavigationDrawer.svelte";
   import AdminLoginDialog from "./components/AdminLoginDialog.svelte";
   import {afterUpdate} from "svelte";
+  import EventEditDialog from "./components/EventEditDialog.svelte";
 
   let events = testEvents;
 
   const theme = "light";
 
   let showAdminDialog = false;
+  let showEventEditDialog = false;
   let showDrawer = false;
   let expandedEventIndex = 0;
+  let currentEventId = -1;
+
+  const eventById = eventId => {
+    return events.find(e => e.id === eventId);
+  }
 
   // called when user requests registration on an event
   const handleRegistration = info => {
@@ -83,7 +90,7 @@
     if (admin) {
       // delete cookie to log out
       writeCookie("admin", "", 365)
-    }else {
+    } else {
       // no admin -> show login dialog
       showAdminDialog = true;
     }
@@ -106,8 +113,16 @@
     // remove locally
     events = events.filter(e => e.id !== eventId)
   };
-  const handleEditEvent = eventId => {
-    // TODO: show edit dialog
+  const handleEditEvent = update => {
+    showEventEditDialog = false;
+    console.log("Updated event: ", update);
+
+    // TODO: update event using API
+
+    // update locally
+    const eventIndex = events.findIndex(e => e.id === update.id);
+    events[eventIndex] = update;
+    events = events;
   };
   const handleAdminDeregister = (eventId, userId) => {
     // TODO: remove registration using API
@@ -161,7 +176,7 @@
             on:register={e => handleRegistration(e.detail)}
             on:deregister={e => handleDeregistration(e.detail)}
             on:admindelete={e => handleDeleteEvent(e.detail.eventId)}
-            on:adminedit={e => handleEditEvent(e.detail.eventId)}
+            on:adminedit={e => {currentEventId = e.detail.eventId; showEventEditDialog = true}}
             on:adminderegister={e => handleAdminDeregister(e.detail.eventId, e.detail.userId)}
             on:admintoggle={e => handleUserToggle(e.detail.eventId, e.detail.userId)}
             events={events}
@@ -182,6 +197,14 @@
             on:cancel={() => showAdminDialog = false}
             on:login={e => handleAdminLogin(e.detail.password)}
     />
+    {#if admin}
+        <EventEditDialog
+            show={showEventEditDialog}
+            event={eventById(currentEventId)}
+            on:cancel={() => showEventEditDialog = false}
+            on:save={e => handleEditEvent(e.detail)}
+        />
+    {/if}
     <TheFooter />
 </MaterialApp>
 
