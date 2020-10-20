@@ -186,22 +186,25 @@
 
 <MaterialApp {theme}>
     <TheAppBar on:showdrawer={() => showDrawer = !showDrawer}/>
-    <Alert class="info-alert blue white-text ma-2" border="left" dense>
-        <h5>Hinweis</h5>
-        Bitte die <a class="white-text text-decoration-underline" on:click={() => showInfoDialog=true}>Regeln</a> durchlesen und beachten!
-    </Alert>
 
-    <h4 class="heading mt-8 ml-1 mb-1">Termine</h4>
-    <EventAccordion
-            on:register={e => handleRegistration(e.detail)}
-            on:deregister={e => handleDeregistration(e.detail)}
-            on:admindelete={e => handleDeleteEvent(e.detail.eventId)}
-            on:adminedit={e => {currentEventId = e.detail.eventId; showEventEditDialog = true}}
-            on:adminderegister={e => handleAdminDeregister(e.detail.eventId, e.detail.userId)}
-            on:admintoggle={e => handleUserToggle(e.detail.eventId, e.detail.userId)}
-            events={events}
-            expandedIndex={expandedEventIndex}
-    />
+    <div style="overflow-y: scroll; max-height: 85vh">
+        <Alert class="info-alert blue white-text ma-2" border="left" dense>
+            <h5>Hinweis</h5>
+            Bitte die <a class="white-text text-decoration-underline" on:click={() => showInfoDialog=true}>Regeln</a> durchlesen und beachten!
+        </Alert>
+
+        <h4 class="heading mt-8 ml-1 mb-1">Termine</h4>
+        <EventAccordion
+                on:register={e => handleRegistration(e.detail)}
+                on:deregister={e => handleDeregistration(e.detail)}
+                on:admindelete={e => handleDeleteEvent(e.detail.eventId)}
+                on:adminedit={e => {currentEventId = e.detail.eventId; showEventEditDialog = true}}
+                on:adminderegister={e => handleAdminDeregister(e.detail.eventId, e.detail.userId)}
+                on:admintoggle={e => handleUserToggle(e.detail.eventId, e.detail.userId)}
+                events={events}
+                expandedIndex={expandedEventIndex}
+        />
+    </div>
     <TheNavigationDrawer
             on:eventclick={e => {
               expandedEventIndex = events.findIndex(ev => ev.id === e.detail.eventId);
