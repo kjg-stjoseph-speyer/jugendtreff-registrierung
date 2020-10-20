@@ -1,5 +1,5 @@
 <script>
-  import {Button, Dialog, Card, CardTitle, CardText, CardActions, TextField, Icon, Slider} from 'svelte-materialify/src';
+  import {Button, Dialog, Card, CardTitle, CardText, CardActions, TextField, Icon} from 'svelte-materialify/src';
   import format from "date-fns/format";
   import {de} from "date-fns/locale";
   import {mdiCalendar} from "@mdi/js";
@@ -26,8 +26,10 @@
   let editedEvent = {maxParticipants: 15};
 
   $: {
-    if (event !== null) {
+    if (event !== null && event !== undefined) {
       editedEvent = event;
+    }else {
+      event = {time: new Date().getTime(), maxParticipants: 15, inCharge: ""}
     }
   }
 
@@ -38,7 +40,7 @@
 <Dialog fullscreen bind:active={show}>
     <Card>
         <CardTitle>
-            <h5>{event === null ? "Neuer Termin" : formatDateTime(event.time)}</h5>
+            <h5>{event === null || event === undefined ? "Neuer Termin" : formatDateTime(event.time)}</h5>
         </CardTitle>
         <CardText>
             <Flatpickr
@@ -48,7 +50,7 @@
                 <div class="flatpickr" id="material-picker">
                     <TextField
                             class="mt-3"
-                            placeholder={event !== null ? formatDateTime(event.time) : ""}
+                            placeholder={event !== null && event !== undefined ? formatDateTime(event.time) : ""}
                             data-input
                     >
                         Termin

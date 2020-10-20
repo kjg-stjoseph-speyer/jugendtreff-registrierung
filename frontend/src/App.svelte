@@ -115,14 +115,32 @@
   };
   const handleEditEvent = update => {
     showEventEditDialog = false;
-    console.log("Updated event: ", update);
 
-    // TODO: update event using API
+    if (update.hasOwnProperty("id")){
+      // updated event
+      console.log("Updated event: ", update);
+      // TODO: update event using API
 
-    // update locally
-    const eventIndex = events.findIndex(e => e.id === update.id);
-    events[eventIndex] = update;
-    events = events;
+      // update locally
+      const eventIndex = events.findIndex(e => e.id === update.id);
+      events[eventIndex] = update;
+      events = events;
+    }else {
+      // new event
+      // TODO: insert new event using API
+
+      // insert locally
+
+      // add missing properties
+      update.id = Math.random() * 100001;
+      update.participants = [];
+
+      console.log("Inserted event: ", update);
+
+      events = [...events, update];
+    }
+
+
   };
   const handleAdminDeregister = (eventId, userId) => {
     // TODO: remove registration using API
@@ -188,6 +206,7 @@
               showDrawer = false;
             }}
             on:adminclick={() => handleAdminClick()}
+            on:new={() => {currentEventId = -1; showEventEditDialog = true}}
             events={events}
             show={showDrawer}
     />

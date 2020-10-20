@@ -1,6 +1,6 @@
 <script>
   import { NavigationDrawer, List, ListItem, Icon } from 'svelte-materialify/src';
-  import {mdiCalendar, mdiAccountCowboyHat} from '@mdi/js';
+  import {mdiCalendar, mdiAccountCowboyHat, mdiCalendarPlus} from '@mdi/js';
   import format from "date-fns/format";
   import {de} from "date-fns/locale";
   import {afterUpdate, createEventDispatcher} from 'svelte'
@@ -38,6 +38,14 @@
     </List>
     <span slot="append">
         <List>
+            {#if admin}
+                <ListItem on:click={() => dispatch("new")}>
+                    <span slot="prepend">
+                        <Icon path={mdiCalendarPlus}/>
+                    </span>
+                    Neuer Termin
+                </ListItem>
+            {/if}
             <ListItem on:click={() => dispatch("adminclick")}>
                 <span slot="prepend">
                     <Icon path={mdiAccountCowboyHat}/>
