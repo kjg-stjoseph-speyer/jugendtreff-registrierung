@@ -3,8 +3,7 @@
   import {mdiCalendar, mdiAccountCowboyHat, mdiCalendarPlus} from '@mdi/js';
   import format from "date-fns/format";
   import {de} from "date-fns/locale";
-  import {afterUpdate, createEventDispatcher} from 'svelte'
-  import {readCookie} from "../CookieHelper";
+  import {createEventDispatcher} from 'svelte'
 
   const dispatch = createEventDispatcher();
 
@@ -13,11 +12,7 @@
     return format(new Date(timestamp), 'd.M. HH:mm', {locale: de}) + " Uhr";
   };
 
-  let admin = false;
-  afterUpdate(async () => {
-    admin = readCookie("admin") !== "";
-  });
-
+  export let admin = false;
   export let show = false;
   export let events = [];
 </script>

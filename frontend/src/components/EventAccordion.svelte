@@ -63,7 +63,6 @@
     return participants.find(p => p.userid === userinfo.userid) !== undefined;
   }
 
-  let admin = false;
   let userinfo = {name: "", email: ""};
   afterUpdate(async () => {
     const cookie = readCookie("userinfo");
@@ -71,8 +70,6 @@
       // userinfo cookie exists
       userinfo = JSON.parse(cookie);
     }
-
-    admin = readCookie("admin") !== "";
   });
 
   let accordionShow = [0];
@@ -81,6 +78,7 @@
     accordionShow = [expandedIndex];
   }
 
+  export let admin = false;
   export let events;
   export let expandedIndex = 0;
 </script>

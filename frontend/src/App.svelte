@@ -8,7 +8,7 @@
   import {testEvents} from './dummyData';
   import TheNavigationDrawer from "./components/TheNavigationDrawer.svelte";
   import AdminLoginDialog from "./components/AdminLoginDialog.svelte";
-  import {afterUpdate} from "svelte";
+  import {onMount} from "svelte";
   import EventEditDialog from "./components/EventEditDialog.svelte";
   import InfoDialog from "./components/InfoDialog.svelte";
 
@@ -91,12 +91,14 @@
   const handleAdminClick = () => {
     if (admin) {
       // delete cookie to log out
-      writeCookie("admin", "", 365)
+      writeCookie("admin", "", 365);
+      showDrawer = false;
+      admin = false;
     } else {
       // no admin -> show login dialog
       showAdminDialog = true;
+      showDrawer = false;
     }
-    showDrawer = false;
   };
 
   // admin event handlers
@@ -105,6 +107,7 @@
 
     if (password === "123456") {
       writeCookie("admin", password, 365);
+      admin = true;
     }
 
     showAdminDialog = false;
@@ -179,13 +182,13 @@
   };
 
   let admin = false;
-  afterUpdate(async () => {
+  onMount(async () => {
     admin = readCookie("admin") !== "";
   });
 </script>
 
 <MaterialApp {theme}>
-    <TheAppBar on:showdrawer={() => showDrawer = !showDrawer}/>
+    <TheAppBar admin={admin} on:showdrawer={() => showDrawer = !showDrawer}/>
 
     <div style="overflow-y: scroll; max-height: 85vh">
         <Alert class="info-alert blue white-text ma-2" border="left" dense>
@@ -202,6 +205,7 @@
                 on:adminderegister={e => handleAdminDeregister(e.detail.eventId, e.detail.userId)}
                 on:admintoggle={e => handleUserToggle(e.detail.eventId, e.detail.userId)}
                 events={events}
+                admin={admin}
                 expandedIndex={expandedEventIndex}
         />
     </div>
@@ -214,6 +218,7 @@
             on:new={() => {currentEventId = -1; showEventEditDialog = true}}
             events={events}
             show={showDrawer}
+            admin={admin}
     />
     <Overlay index={1} active={showDrawer} on:click={() => showDrawer = false}/>
     <AdminLoginDialog

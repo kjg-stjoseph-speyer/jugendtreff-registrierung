@@ -1,15 +1,11 @@
 <script>
   import {AppBar, Button, Icon} from 'svelte-materialify/src';
   import {mdiMenu} from '@mdi/js';
-  import { createEventDispatcher, afterUpdate } from 'svelte'
-  import {readCookie} from "../CookieHelper";
+  import { createEventDispatcher } from 'svelte'
 
   const dispatch = createEventDispatcher();
 
-  let admin = false;
-  afterUpdate(async () => {
-    admin = readCookie("admin") !== "";
-  });
+  export let admin = false;
 </script>
 
 <AppBar class="light-green darken-2">
