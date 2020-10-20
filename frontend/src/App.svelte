@@ -10,6 +10,7 @@
   import AdminLoginDialog from "./components/AdminLoginDialog.svelte";
   import {afterUpdate} from "svelte";
   import EventEditDialog from "./components/EventEditDialog.svelte";
+  import InfoDialog from "./components/InfoDialog.svelte";
 
   let events = testEvents;
 
@@ -17,6 +18,7 @@
 
   let showAdminDialog = false;
   let showEventEditDialog = false;
+  let showInfoDialog = false;
   let showDrawer = false;
   let expandedEventIndex = 0;
   let currentEventId = -1;
@@ -116,7 +118,7 @@
   const handleEditEvent = update => {
     showEventEditDialog = false;
 
-    if (update.hasOwnProperty("id")){
+    if (update.hasOwnProperty("id")) {
       // updated event
       console.log("Updated event: ", update);
       // TODO: update event using API
@@ -125,7 +127,7 @@
       const eventIndex = events.findIndex(e => e.id === update.id);
       events[eventIndex] = update;
       events = events;
-    }else {
+    } else {
       // new event
       // TODO: insert new event using API
 
@@ -186,7 +188,7 @@
     <TheAppBar on:showdrawer={() => showDrawer = !showDrawer}/>
     <Alert class="info-alert blue white-text ma-2" border="left" dense>
         <h5>Hinweis</h5>
-        Bitte Hygienehinweise beachten!
+        Bitte die <a class="white-text text-decoration-underline" on:click={() => showInfoDialog=true}>Regeln</a> durchlesen und beachten!
     </Alert>
 
     <h4 class="heading mt-8 ml-1 mb-1">Termine</h4>
@@ -216,6 +218,7 @@
             on:cancel={() => showAdminDialog = false}
             on:login={e => handleAdminLogin(e.detail.password)}
     />
+    <InfoDialog show={showInfoDialog} on:close={() => showInfoDialog = false}/>
     {#if admin}
         <EventEditDialog
             show={showEventEditDialog}
@@ -229,6 +232,9 @@
 
 
 <style>
+    .link{
+        text-underline: white;
+    }
     .info-alert {
         margin: 15px;
     }
