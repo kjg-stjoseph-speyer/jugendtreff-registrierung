@@ -90,6 +90,7 @@
     showDrawer = false;
   };
 
+  // admin event handlers
   const handleAdminLogin = password => {
     // TODO: check credentials using API
 
@@ -98,6 +99,48 @@
     }
 
     showAdminDialog = false;
+  };
+  const handleDeleteEvent = eventId => {
+    // TODO: remove event using API
+
+    // remove locally
+    events = events.filter(e => e.id !== eventId)
+  };
+  const handleEditEvent = eventId => {
+    // TODO: show edit dialog
+  };
+  const handleAdminDeregister = (eventId, userId) => {
+    // TODO: remove registration using API
+
+    // remove locally
+    // for now just remove changes locally
+    const eventToUpdateIndex = events.findIndex(e => e.id === eventId);
+    const eventToUpdate = events[eventToUpdateIndex];
+    eventToUpdate.participants = eventToUpdate.participants.filter(p => p.userid !== userId);
+    events.splice(eventToUpdateIndex, 1, eventToUpdate);
+
+    // trigger reactivity
+    events = events;
+  };
+  const handleUserToggle = (eventId, userId) => {
+    console.log("Toggle user " + userId + " on event " + eventId);
+    // TODO: toggle using API
+
+    // for now just update changes locally
+
+    // get event
+    const eventToUpdateIndex = events.findIndex(e => e.id === eventId);
+    const eventToUpdate = events[eventToUpdateIndex];
+
+    // get user
+    const userIndex = eventToUpdate.participants.findIndex(p => p.userid === userId);
+    // toggle waiting status
+    eventToUpdate.participants[userIndex].waiting = !eventToUpdate.participants[userIndex].waiting;
+
+    events.splice(eventToUpdateIndex, 1, eventToUpdate);
+
+    // trigger reactivity
+    events = events;
   };
 
   let admin = false;
@@ -117,6 +160,10 @@
     <EventAccordion
             on:register={e => handleRegistration(e.detail)}
             on:deregister={e => handleDeregistration(e.detail)}
+            on:admindelete={e => handleDeleteEvent(e.detail.eventId)}
+            on:adminedit={e => handleEditEvent(e.detail.eventId)}
+            on:adminderegister={e => handleAdminDeregister(e.detail.eventId, e.detail.userId)}
+            on:admintoggle={e => handleUserToggle(e.detail.eventId, e.detail.userId)}
             events={events}
             expandedIndex={expandedEventIndex}
     />

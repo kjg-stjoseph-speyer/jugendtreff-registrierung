@@ -23,7 +23,6 @@
   };
 
   let registerDialogVisible = false;
-  let registerEventId = -1;
   let registerEventName = "";
   let registerEventTime = new Date();
 
@@ -36,7 +35,7 @@
   const handleRegisterClick = (event) => {
     if (!isUserRegistered(event.participants, userinfo.name)) {
       // register user
-      registerEventId = event.id;
+      currentEventId = event.id;
       registerEventName = formatDateTime(event.time);
       registerEventTime = new Date(event.time);
       registerDialogVisible = true;
@@ -48,7 +47,7 @@
   const registerUser = (event) => {
     dispatch("register", {
       ...event.detail,
-      eventId: registerEventId
+      eventId: currentEventId
     })
 
     registerDialogVisible = false;
@@ -152,8 +151,8 @@
                         {#each event.participants as p (p.name)}
                             {#if !p.waiting}
                                 <ParticipantChip
-                                        on:close={() => {currentUserId = p.id; showConfirmUserDelete = true}}
-                                        on:click={() => {currentUserId = p.id; showConfirmUserToggle = true}}
+                                        on:close={() => {currentUserId = p.userid; currentEventId = event.id; showConfirmUserDelete = true}}
+                                        on:click={() => {currentUserId = p.userid; currentEventId = event.id; showConfirmUserToggle = true}}
                                         allowClose={admin}
                                         participant={p}
                                 />
@@ -171,8 +170,8 @@
                         {#each event.participants as p (p.name)}
                             {#if p.waiting}
                                 <ParticipantChip
-                                        on:close={() => {currentUserId = p.id; showConfirmUserDelete = true}}
-                                        on:click={() => {currentUserId = p.id; showConfirmUserToggle = true}}
+                                        on:close={() => {currentUserId = p.userid; currentEventId = event.id; showConfirmUserDelete = true}}
+                                        on:click={() => {currentUserId = p.userid; currentEventId = event.id; showConfirmUserToggle = true}}
                                         allowClose={admin}
                                         participant={p}
                                 />
@@ -198,14 +197,14 @@
             title="Teilnehmer entfernen"
             text="Teilnehmer wirklich entfernen? Der Teilnehmer und eventuelle Nachrücker werden benachrichtigt"
             on:cancel={() => showConfirmUserDelete = false}
-            on:confirm={() => {dispatch("adminderegister", {userId: currentUserId}); showConfirmUserDelete = false}}
+            on:confirm={() => {dispatch("adminderegister", {eventId: currentEventId, userId: currentUserId}); showConfirmUserDelete = false}}
     />
     <ConfirmationDialog
             show={showConfirmUserToggle}
             title="Teilnehmer verschieben"
             text="Teilnehmer wirklich verschieben? Der Teilnehmer wird benachrichtigt"
             on:cancel={() => showConfirmUserToggle = false}
-            on:confirm={() => {dispatch("admintoggle", {userId: currentUserId}); showConfirmUserToggle = false}}
+            on:confirm={() => {dispatch("admintoggle", {eventId: currentEventId, userId: currentUserId}); showConfirmUserToggle = false}}
     />
 {/if}
 

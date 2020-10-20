@@ -15,9 +15,9 @@
   export let allowClose = false;
 </script>
 
-<Chip class="ma-1" on:click={() => dispatch("click")}>
+<Chip class="ma-1" >
     <Icon path={participant.waiting ? mdiAccountClock : mdiAccountCheck} />
-    <div class="d-flex flex-column">
+    <div on:click={() => dispatch("click")} class="d-flex flex-column">
         <span class="mt-2">{participant.name}</span>
         {#if participant.timePreference > 0}
             <span class="time mb-2" style="margin-top: -5px">Ab {formatTime(participant.timePreference)}</span>
