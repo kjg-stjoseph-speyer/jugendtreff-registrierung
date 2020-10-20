@@ -18,6 +18,7 @@
     time_24hr: true,
     dateFormat: "D, d. M. H:i",
     wrap: true,
+    disableMobile: true,
     onChange: (selectedDates, dateStr, instance) => {
       editedEvent.time = selectedDates[0].getTime()
     }

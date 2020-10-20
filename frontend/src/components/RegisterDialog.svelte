@@ -6,22 +6,17 @@
 
   const dispatch = createEventDispatcher();
 
+  const emailPattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
   let name = "";
   let email = "";
   let time = null;
-
-  export let active;
-  export let eventName;
-  export let eventTime;
-  export let defaultName = "";
-  export let defaultEmail = "";
 
   // field verification
   const nameRules = [(v) => !!v || 'Pflichtangabe!', (v) => v.length <= 25 || 'Max. 25 Buchstaben'];
   const emailRules = [
     (v) => {
-      const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-      return pattern.test(v) || 'Ungültige E-Mail Adresse';
+      return emailPattern.test(v) || 'Ungültige E-Mail Adresse';
     },
   ];
 
@@ -30,6 +25,7 @@
     noCalendar: true,
     time_24hr: true,
     dateFormat: "H:i",
+    disableMobile: true,
     wrap: true,
     onChange: (selectedDates, dateStr, instance) => {
       time = selectedDates[0].getTime()
@@ -38,15 +34,24 @@
 
   $: {
     time = eventTime;
-    name = defaultName;
-    email = defaultEmail;
   }
 
  const handleSubmit = () => {
-    if (name.length > 0) {
-      dispatch("save", {name, time, email});
-    }
+   const submitName = name === "" ? defaultName : name;
+   const submitEmail = email === "" ? defaultEmail : email;
+
+   if (submitName.length > 0 && submitName.length <= 25 && (submitEmail === "" || emailPattern.test(submitEmail))) {
+       dispatch("save", {name: submitName, time, email: submitEmail});
+   }else {
+     console.log("Validation failed", defaultName, defaultEmail)
+   }
   }
+
+  export let active;
+  export let eventName;
+  export let eventTime;
+  export let defaultName = "";
+  export let defaultEmail = "";
 </script>
 
 <svelte:head>
@@ -65,7 +70,7 @@
                     hint="Vorname, Spitzname, o.Ä."
                     class="mt-3"
                     bind:value={name}
-                    placeholder=""
+                    placeholder={defaultName}
                     counter="25"
                     validateOnBlur
                     tabIndex="-1"
@@ -81,7 +86,7 @@
                     <TextField
                             hint="Ab wann bist du etwa vor Ort?"
                             class="mt-3"
-                            placeholder={eventTime.getHours() + ":" + eventTime.getMinutes()}
+                            placeholder={eventTime.getHours() + ":" + eventTime.getMinutes().toString().padStart(2, '0')}
                             data-input
                     >
                         Uhrzeit
@@ -97,7 +102,7 @@
                     hint="Wenn du eine E-Mail Adresse angibst wirst du über Änderungen deiner Registrierung informiert"
                     class="mt-3"
                     bind:value={email}
-                    placeholder=""
+                    placeholder={defaultEmail}
                     rules={emailRules}
             >
                 E-Mail (optional)

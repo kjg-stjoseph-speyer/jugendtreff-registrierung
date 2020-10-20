@@ -61,7 +61,7 @@
     // check for duplicate name
     if (!eventToUpdate.participants.find(p => p.name === info.name)) {
       eventToUpdate.participants = [...eventToUpdate.participants,
-        {name: info.name, timePreference: info.time.getTime(), userid: userinfo.userid, waiting: isWaiting}
+        {name: info.name, timePreference: info.time, userid: userinfo.userid, waiting: isWaiting}
       ]
       events.splice(eventToUpdateIndex, 1, eventToUpdate);
 
