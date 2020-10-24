@@ -38,6 +38,11 @@ class EventRegistration implements JsonSerializable
     private $isWaiting;
 
     /**
+     * @var int
+     */
+    private $registrationTime;
+
+    /**
      * EventRegistration constructor.
      * @param int|null  $id
      * @param int $eventId
@@ -45,8 +50,9 @@ class EventRegistration implements JsonSerializable
      * @param string $name
      * @param int $time
      * @param bool $isWaiting
+     * @param int|null $registrationTime
      */
-    public function __construct(?int $id, int $eventId, int $userId, string $name, int $time, bool $isWaiting)
+    public function __construct(?int $id, int $eventId, int $userId, string $name, int $time, bool $isWaiting, int $registrationTime = null)
     {
         $this->id = $id;
         $this->eventId = $eventId;
@@ -54,6 +60,12 @@ class EventRegistration implements JsonSerializable
         $this->name = $name;
         $this->time = $time;
         $this->isWaiting = $isWaiting;
+
+        if ($registrationTime == null) {
+            $this->registrationTime = time();
+        }else {
+            $this->registrationTime = $registrationTime;
+        }
     }
 
     /**
@@ -152,6 +164,22 @@ class EventRegistration implements JsonSerializable
         $this->isWaiting = $isWaiting;
     }
 
+    /**
+     * @return int
+     */
+    public function getRegistrationTime(): int
+    {
+        return $this->registrationTime;
+    }
+
+    /**
+     * @param int $registrationTime
+     */
+    public function setRegistrationTime(int $registrationTime): void
+    {
+        $this->registrationTime = $registrationTime;
+    }
+
     public function jsonSerialize()
     {
         return [
@@ -160,6 +188,7 @@ class EventRegistration implements JsonSerializable
             'user_id' => $this->userId,
             'name' => $this->name,
             'time' => $this->time,
+            'registration_time' => $this->registrationTime,
             'waiting' => $this->isWaiting
         ];
     }
