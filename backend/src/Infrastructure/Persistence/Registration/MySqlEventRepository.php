@@ -9,6 +9,7 @@ use App\Domain\Registration\EventRegistration;
 use App\Domain\Registration\EventRepository;
 use PDO;
 use PDOException;
+use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 
 class MySqlEventRepository implements EventRepository
@@ -16,15 +17,16 @@ class MySqlEventRepository implements EventRepository
     private $pdo;
 
     private $logger;
+    private $settings;
 
-    public function __construct(LoggerInterface $logger) {
+    public function __construct(LoggerInterface $logger, ContainerInterface $c) {
         $this->logger = $logger;
+        $this->settings = $c->get('settings');
 
-        // TODO: DI settings
-        $host = '127.0.0.1';
-        $db   = 'jugendtreff';
-        $user = 'root';
-        $password = '123456';
+        $host = $this->settings['mysql_host'];
+        $db   = $this->settings['mysql_database'];
+        $user = $this->settings['mysql_user'];
+        $password = $this->settings['mysql_password'];
         $charset = 'utf8mb4';
 
         $dsn = "mysql:host=$host;dbname=$db;charset=$charset";

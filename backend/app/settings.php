@@ -10,7 +10,7 @@ return function (ContainerBuilder $containerBuilder) {
         'settings' => [
             'displayErrorDetails' => true, // Should be set to false in production
             'admin_key' => '123456',
-            'mysql_host' => 'localhost',
+            'mysql_host' => '127.0.0.1',
             'mysql_user' => 'root',
             'mysql_password' => '123456',
             'mysql_database' => 'jugendtreff',
