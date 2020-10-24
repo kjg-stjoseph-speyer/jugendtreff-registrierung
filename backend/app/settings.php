@@ -9,8 +9,13 @@ return function (ContainerBuilder $containerBuilder) {
     $containerBuilder->addDefinitions([
         'settings' => [
             'displayErrorDetails' => true, // Should be set to false in production
+            'admin_key' => '123456',
+            'mysql_host' => 'localhost',
+            'mysql_user' => 'root',
+            'mysql_password' => '123456',
+            'mysql_database' => 'jugendtreff',
             'logger' => [
-                'name' => 'slim-app',
+                'name' => 'jugendtreff-api',
                 'path' => isset($_ENV['docker']) ? 'php://stdout' : __DIR__ . '/../logs/app.log',
                 'level' => Logger::DEBUG,
             ],

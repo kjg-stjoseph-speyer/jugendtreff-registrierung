@@ -15,8 +15,7 @@ class DeleteEventAction extends EventAction
     {
         $body = $this->request->getParsedBody();
 
-        // TODO: load key from settings
-        if (strcmp($body['key'], "123456") == 0) {
+        if (strcmp($body['key'], $this->settings['admin_key']) == 0) {
             $userId = (int) $this->resolveArg('id');
 
             $this->eventRepository->deleteEvent($userId);

@@ -14,8 +14,7 @@ class CreateEventAction extends EventAction
     {
         $body = $this->request->getParsedBody();
 
-        // TODO: load key from settings
-        if (strcmp($body['key'], "123456") == 0) {
+        if (strcmp($body['key'], $this->settings['admin_key']) == 0) {
             $eventToInsert = new Event(-1, $body['data']['time'], $body['data']['in_charge'], $body['data']['max_participants']);
 
             $insertedEvent = $this->eventRepository->createEvent($eventToInsert);
