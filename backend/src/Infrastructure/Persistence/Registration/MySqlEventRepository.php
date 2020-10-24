@@ -121,8 +121,8 @@ class MySqlEventRepository implements EventRepository
     {
         $registrationTime = round(microtime(true) * 1000);
 
-        $stmt = $this->pdo->prepare('INSERT INTO registrations (event_id, user_id, name, time, waiting, registration_time) VALUES (?, ?, ?, ?, ?, ?)');
-        $stmt->execute([$registration->getEventId(), $registration->getUserId(), $registration->getName(),
+        $stmt = $this->pdo->prepare('INSERT INTO registrations (event_id, user_id, name, email, time, waiting, registration_time) VALUES (?, ?, ?, ?, ?, ?, ?)');
+        $stmt->execute([$registration->getEventId(), $registration->getUserId(), $registration->getName(), $registration->getEmail(),
             $registration->getTime(), $registration->isWaiting(), $registrationTime]);
 
         // get last inserted row
@@ -173,7 +173,7 @@ class MySqlEventRepository implements EventRepository
     }
 
     private function registrationFromDbRow($row) : EventRegistration {
-        return new EventRegistration($row['id'], $row['event_id'], $row['user_id'], $row['name'], $row['time'],
+        return new EventRegistration($row['id'], $row['event_id'], $row['user_id'], $row['name'], $row['email'], $row['time'],
             $row['waiting'], $row['registration_time']);
     }
 }
