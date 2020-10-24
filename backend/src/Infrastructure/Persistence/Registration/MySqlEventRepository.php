@@ -7,6 +7,7 @@ namespace App\Infrastructure\Persistence\Registration;
 use App\Domain\Registration\Event;
 use App\Domain\Registration\EventRegistration;
 use App\Domain\Registration\EventRepository;
+use App\Utility\MailHelper;
 use PDO;
 use PDOException;
 use Psr\Container\ContainerInterface;
@@ -85,6 +86,8 @@ class MySqlEventRepository implements EventRepository
 
     public function updateEvent(int $id, Event $updatedEvent): Event
     {
+        $beforeUpdate = $this->fetchEventById($id);
+
         $stmt = $this->pdo->prepare('UPDATE events SET time=?, in_charge=?, max_participants=? WHERE id=?');
         $stmt->execute([$updatedEvent->getTime(), $updatedEvent->getInCharge(), $updatedEvent->getMaxParticipants(), $id]);
 
@@ -96,11 +99,17 @@ class MySqlEventRepository implements EventRepository
         $e = $this->eventFromDbRow($row);
         $e->setRegistrations($updatedEvent->getRegistrations());
 
+        // notify participants about update
+        MailHelper::sendEventUpdateMail($this->settings['notification_email'], $beforeUpdate, $e);
+
         return $e;
     }
 
     public function deleteEvent(int $id): void
     {
+        // notify participants about event deletion
+        MailHelper::sendEventDeleteMail($this->settings['notification_email'], $this->fetchEventById($id));
+
         // delete all registrations
         $stmt = $this->pdo->prepare("DELETE FROM registrations WHERE event_id=?");
         $stmt->execute([$id]);
@@ -140,8 +149,13 @@ class MySqlEventRepository implements EventRepository
         $stmt = $this->pdo->prepare('SELECT * FROM registrations WHERE id=?');
         $stmt->execute([$id]);
         $row = $stmt->fetch();
+        $updatedReg = $this->registrationFromDbRow($row);
 
-        return $this->registrationFromDbRow($row);
+        // notify using email
+        MailHelper::sendWaitingChangedMail($this->settings['notification_email'], $updatedReg,
+            $this->fetchEventById($updatedReg->getEventId()));
+
+        return $updatedReg;
     }
 
     public function deleteRegistration(int $id): void
@@ -175,5 +189,24 @@ class MySqlEventRepository implements EventRepository
     private function registrationFromDbRow($row) : EventRegistration {
         return new EventRegistration($row['id'], $row['event_id'], $row['user_id'], $row['name'], $row['email'], $row['time'],
             $row['waiting'], $row['registration_time']);
+    }
+
+    private function fetchEventById($eventId) {
+        $stmt = $this->pdo->prepare('SELECT * FROM events WHERE id=?');
+        $stmt->execute([$eventId]);
+        $row = $stmt->fetch();
+        $e = $this->eventFromDbRow($row);
+
+        $regStmt = $this->pdo->prepare('SELECT * FROM registrations WHERE event_id=?');
+        $regStmt->execute([$e->getId()]);
+
+        $regs = [];
+        while ($regRow = $regStmt->fetch()) {
+            array_push($regs, $this->registrationFromDbRow($regRow));
+        }
+
+        $e->setRegistrations($regs);
+
+        return $e;
     }
 }

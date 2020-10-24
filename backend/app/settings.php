@@ -14,6 +14,7 @@ return function (ContainerBuilder $containerBuilder) {
             'mysql_user' => 'root',
             'mysql_password' => '123456',
             'mysql_database' => 'jugendtreff',
+            'notification_email' => "noreply@example.com",
             'logger' => [
                 'name' => 'jugendtreff-api',
                 'path' => isset($_ENV['docker']) ? 'php://stdout' : __DIR__ . '/../logs/app.log',
