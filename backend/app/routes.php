@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+use App\Application\Actions\Registration\CheckAuthenticationAction;
 use App\Application\Actions\Registration\CreateEventAction;
 use App\Application\Actions\Registration\CreateRegistrationAction;
 use App\Application\Actions\Registration\DeleteEventAction;
@@ -47,4 +48,6 @@ return function (App $app) {
         // delete registration
         $group->delete('/{id}', DeleteRegistrationAction::class);
     });
+
+    $app->post('/checkauth', CheckAuthenticationAction::class);
 };
