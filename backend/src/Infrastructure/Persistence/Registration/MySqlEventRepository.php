@@ -49,25 +49,13 @@ class MySqlEventRepository implements EventRepository
         // now + 24h
         $timeThreshold = round(microtime(true) * 1000) + 24*60*60*1000;
 
-        $stmt = $this->pdo->prepare('SELECT * FROM events WHERE time > ?');
+        $stmt = $this->pdo->prepare('SELECT id FROM events WHERE time > ?');
         $stmt->execute([$timeThreshold]);
 
         $events = [];
         while ($row = $stmt->fetch())
         {
-            $e = $this->eventFromDbRow($row);
-
-            $regStmt = $this->pdo->prepare('SELECT * FROM registrations WHERE event_id=?');
-            $regStmt->execute([$e->getId()]);
-
-            $regs = [];
-            while ($regRow = $regStmt->fetch()) {
-                array_push($regs, $this->registrationFromDbRow($regRow));
-            }
-
-            $e->setRegistrations($regs);
-
-            array_push($events, $e);
+            array_push($events, $this->fetchEventById($row['id']));
         }
 
         return $events;
@@ -81,7 +69,10 @@ class MySqlEventRepository implements EventRepository
         // get last inserted row
         $stmt = $this->pdo->query('SELECT * FROM events ORDER BY id DESC LIMIT 1');
         $row = $stmt->fetch();
-        return $this->eventFromDbRow($row);
+        $e = $this->eventFromDbRow($row);
+        $e->setRegistrations([]);
+
+        return $e;
     }
 
     public function updateEvent(int $id, Event $updatedEvent): Event
@@ -92,12 +83,7 @@ class MySqlEventRepository implements EventRepository
         $stmt->execute([$updatedEvent->getTime(), $updatedEvent->getInCharge(), $updatedEvent->getMaxParticipants(), $id]);
 
         // get updated row
-        $stmt = $this->pdo->prepare('SELECT * FROM events WHERE id=?');
-        $stmt->execute([$id]);
-        $row = $stmt->fetch();
-
-        $e = $this->eventFromDbRow($row);
-        $e->setRegistrations($updatedEvent->getRegistrations());
+        $e = $this->fetchEventById($id);
 
         // notify participants about update
         MailHelper::sendEventUpdateMail($this->settings['notification_email'], $beforeUpdate, $e);
@@ -131,8 +117,15 @@ class MySqlEventRepository implements EventRepository
         $registrationTime = round(microtime(true) * 1000);
 
         $stmt = $this->pdo->prepare('INSERT INTO registrations (event_id, user_id, name, email, time, waiting, registration_time) VALUES (?, ?, ?, ?, ?, ?, ?)');
-        $stmt->execute([$registration->getEventId(), $registration->getUserId(), $registration->getName(), $registration->getEmail(),
-            $registration->getTime(), $registration->isWaiting(), $registrationTime]);
+        $stmt->bindValue(1, $registration->getEventId(), PDO::PARAM_INT);
+        $stmt->bindValue(2, $registration->getUserId(), PDO::PARAM_INT);
+        $stmt->bindValue(3, $registration->getName(), PDO::PARAM_STR);
+        $stmt->bindValue(4, $registration->getEmail(), PDO::PARAM_STR);
+        $stmt->bindValue(5, $registration->getTime(), PDO::PARAM_INT);
+        $stmt->bindValue(6, $registration->isWaiting(), PDO::PARAM_BOOL);
+        $stmt->bindValue(7, $registrationTime, PDO::PARAM_INT);
+
+        $stmt->execute();
 
         // get last inserted row
         $stmt = $this->pdo->query('SELECT * FROM registrations ORDER BY id DESC LIMIT 1');
@@ -174,11 +167,16 @@ class MySqlEventRepository implements EventRepository
             // get next participant that is on waiting list for this event
             $stmt = $this->pdo->prepare('SELECT * FROM registrations WHERE event_id=? AND waiting=1 ORDER BY registration_time ASC LIMIT 1');
             $stmt->execute([$oldReg->getEventId()]);
-            $newReg = $this->registrationFromDbRow($stmt->fetch());
 
-            $newReg->setIsWaiting(false);
 
-            $this->updateRegistration($newReg->getId(), $newReg);
+            if ($stmt->rowCount() > 0) {
+                // there is someone waiting
+                $this->logger->debug("2");
+                $newReg = $this->registrationFromDbRow($stmt->fetch());
+                $newReg->setIsWaiting(false);
+                $this->updateRegistration($newReg->getId(), $newReg);
+            }
+
         }
     }
 

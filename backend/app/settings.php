@@ -17,7 +17,8 @@ return function (ContainerBuilder $containerBuilder) {
             'notification_email' => "noreply@example.com",
             'logger' => [
                 'name' => 'jugendtreff-api',
-                'path' => isset($_ENV['docker']) ? 'php://stdout' : __DIR__ . '/../logs/app.log',
+                //'path' => isset($_ENV['docker']) ? 'php://stdout' : __DIR__ . '/../logs/app.log',
+                'path' => 'php://stdout',
                 'level' => Logger::DEBUG,
             ],
         ],

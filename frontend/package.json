@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@mdi/js": "^5.7.55",
+    "axios": "^0.21.0",
     "date-fns": "^2.16.1",
     "flatpickr": "^4.6.6",
     "sirv-cli": "^1.0.0",

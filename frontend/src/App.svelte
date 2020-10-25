@@ -5,14 +5,14 @@
   import TheFooter from "./components/TheFooter.svelte";
   import EventAccordion from "./components/EventAccordion.svelte";
   import {writeCookie, readCookie} from './CookieHelper';
-  import {testEvents} from './dummyData';
   import TheNavigationDrawer from "./components/TheNavigationDrawer.svelte";
   import AdminLoginDialog from "./components/AdminLoginDialog.svelte";
   import {onMount} from "svelte";
   import EventEditDialog from "./components/EventEditDialog.svelte";
   import InfoDialog from "./components/InfoDialog.svelte";
+  import * as api from './api/EventApi';
 
-  let events = testEvents;
+  let events = [];
 
   const theme = "light";
 
@@ -29,8 +29,6 @@
 
   // called when user requests registration on an event
   const handleRegistration = info => {
-    console.log(info);
-
     // create cookie with user information
     const saved = readCookie("userinfo");
 
@@ -50,9 +48,6 @@
     writeCookie("userinfo", JSON.stringify(userinfo), 365);
 
 
-    // TODO: register using API
-    // for now just add the changes locally
-
     // get event by id
     const eventToUpdateIndex = events.findIndex(e => e.event_id === info.eventId);
     const eventToUpdate = events[eventToUpdateIndex];
@@ -60,32 +55,52 @@
 
     // check for duplicate name
     if (!eventToUpdate.registrations.find(p => p.name === info.name)) {
-      eventToUpdate.registrations = [...eventToUpdate.registrations,
-        {name: info.name, time: info.time, userid: userinfo.userid, waiting: isWaiting}
-      ]
-      events.splice(eventToUpdateIndex, 1, eventToUpdate);
 
-      // trigger reactivity
-      events = events;
+      const registration = {name: info.name, email: userinfo.email, time: info.time.getTime(),
+        user_id: userinfo.userid, event_id: info.eventId, waiting: isWaiting}
+
+      // TODO: show loading overlay
+      api.createRegistration(registration)
+        .then(data => {
+          eventToUpdate.registrations = [...eventToUpdate.registrations,
+            data
+          ]
+          events.splice(eventToUpdateIndex, 1, eventToUpdate);
+
+          // trigger reactivity
+          events = events;
+        })
+        .catch(e => {
+          // TODO: show error dialog
+        });
+
+
     } else {
+      // TODO: show error dialog
       console.log("Duplicate")
     }
 
   };
 
   const handleDeregistration = info => {
-    console.log(info);
-
-    // TODO: remove registration using API
-
-    // for now just remove changes locally
     const eventToUpdateIndex = events.findIndex(e => e.event_id === info.eventId);
     const eventToUpdate = events[eventToUpdateIndex];
-    eventToUpdate.registrations = eventToUpdate.registrations.filter(p => p.user_id !== info.userId);
-    events.splice(eventToUpdateIndex, 1, eventToUpdate);
 
-    // trigger reactivity
-    events = events;
+    // get registration id
+    const regId = eventToUpdate.registrations.filter(p => p.user_id === info.userId)[0].registration_id;
+
+    // TODO: show loading overlay
+    api.deleteRegistration(regId)
+      .then(() => {
+        eventToUpdate.registrations = eventToUpdate.registrations.filter(p => p.user_id !== info.userId);
+        events.splice(eventToUpdateIndex, 1, eventToUpdate);
+
+        // trigger reactivity
+        events = events;
+      })
+      .catch(e => {
+        // TODO: show error dialog
+      });
   };
 
   const handleAdminClick = () => {
@@ -103,87 +118,122 @@
 
   // admin event handlers
   const handleAdminLogin = password => {
-    // TODO: check credentials using API
-
-    if (password === "123456") {
-      writeCookie("admin", password, 365);
-      admin = true;
-    }
-
-    showAdminDialog = false;
+    // TODO: show loading overlay
+    api.checkAuthentication(password)
+      .then(resp => {
+        if (resp.valid === true) {
+          writeCookie("admin", password, 365);
+          admin = true;
+        }
+      })
+      .catch(e => {
+        // TODO: show invalid credential dialog
+      })
+      .finally(() => {
+        showAdminDialog = false;
+      });
   };
   const handleDeleteEvent = eventId => {
-    // TODO: remove event using API
+    const adminKey = readCookie("admin");
 
-    // remove locally
-    events = events.filter(e => e.event_id !== eventId)
+    // TODO: show loading overlay
+    api.deleteEvent(eventId, adminKey)
+      .then(() => {
+        // remove locally
+        events = events.filter(e => e.event_id !== eventId)
+      })
+      .catch(() => {
+        // TODO: show error dialog
+      });
   };
   const handleEditEvent = update => {
     showEventEditDialog = false;
 
+    const adminKey = readCookie("admin");
     if (update.hasOwnProperty("event_id")) {
-      // updated event
-      console.log("Updated event: ", update);
-      // TODO: update event using API
-
-      // update locally
-      const eventIndex = events.findIndex(e => e.event_id === update.event_id);
-      events[eventIndex] = update;
-      events = events;
+      // TODO:show loading overlay
+      api.updateEvent(update, adminKey)
+        .then(data => {
+          // update locally
+          const eventIndex = events.findIndex(e => e.event_id === update.event_id);
+          events[eventIndex] = data;
+          events = events;
+        })
+        .catch(e => {
+          // TODO: show error dialog
+        });
     } else {
       // new event
-      // TODO: insert new event using API
 
-      // insert locally
-
-      // add missing properties
-      update.event_id = Math.random() * 100001;
-      update.registrations = [];
-
-      console.log("Inserted event: ", update);
-
-      events = [...events, update];
+      // TODO: show loading overlay
+      api.createEvent(update, adminKey)
+        .then(data => {
+          // insert locally
+          events = [...events, data];
+        })
+        .catch(e => {
+          // TODO: show error dialog
+        });
     }
-
-
   };
   const handleAdminDeregister = (eventId, userId) => {
-    // TODO: remove registration using API
-
-    // remove locally
-    // for now just remove changes locally
     const eventToUpdateIndex = events.findIndex(e => e.event_id === eventId);
     const eventToUpdate = events[eventToUpdateIndex];
-    eventToUpdate.registrations = eventToUpdate.registrations.filter(p => p.user_id !== userId);
-    events.splice(eventToUpdateIndex, 1, eventToUpdate);
 
-    // trigger reactivity
-    events = events;
+    // get registration id
+    const regId = eventToUpdate.registrations.filter(p => p.user_id === userId).registration_id;
+
+    // TODO: show loading overlay
+    api.deleteRegistration(regId)
+      .then(() => {
+        eventToUpdate.registrations = eventToUpdate.registrations.filter(p => p.user_id !== userId);
+        events.splice(eventToUpdateIndex, 1, eventToUpdate);
+
+        // trigger reactivity
+        events = events;
+      })
+      .catch(e => {
+        // TODO: show error dialog
+      });
   };
+
   const handleUserToggle = (eventId, userId) => {
-    console.log("Toggle user " + userId + " on event " + eventId);
-    // TODO: toggle using API
-
-    // for now just update changes locally
-
     // get event
     const eventToUpdateIndex = events.findIndex(e => e.event_id === eventId);
     const eventToUpdate = events[eventToUpdateIndex];
 
     // get user
     const userIndex = eventToUpdate.registrations.findIndex(p => p.user_id === userId);
-    // toggle waiting status
-    eventToUpdate.registrations[userIndex].waiting = !eventToUpdate.registrations[userIndex].waiting;
 
-    events.splice(eventToUpdateIndex, 1, eventToUpdate);
+    const updatedRegistration = eventToUpdate.registrations[userIndex];
+    updatedRegistration.waiting = !updatedRegistration.waiting;
 
-    // trigger reactivity
-    events = events;
+    // TODO: show loading overlay
+    api.updateRegistration(updatedRegistration)
+      .then(data => {
+        eventToUpdate.registrations[userIndex] = data;
+        events.splice(eventToUpdateIndex, 1, eventToUpdate);
+
+        // trigger reactivity
+        events = events;
+      })
+      .catch(e => {
+        // TODO: show error dialog
+      });
   };
 
   let admin = false;
   onMount(async () => {
     admin = readCookie("admin") !== "";
+
+    // fetch events using API
+    api.fetchAllEvents()
+      .then(data => {
+        events = data;
+      })
+      .catch(e => {
+        // TODO: show error dialog
+      });
   });
 </script>
 

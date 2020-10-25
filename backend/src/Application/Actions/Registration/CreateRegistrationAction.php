@@ -15,7 +15,7 @@ class CreateRegistrationAction extends EventAction
         $body = $this->request->getParsedBody();
 
         $registrationToInsert = new EventRegistration(-1, $body['event_id'], $body['user_id'],
-            $body['name'], $body['time'], $body['waiting']);
+            $body['name'], $body['email'], $body['time'], $body['waiting']);
 
         if ($this->eventRepository->eventExists($registrationToInsert->getEventId())) {
             $insertedRegistration = $this->eventRepository->createRegistration($registrationToInsert);
