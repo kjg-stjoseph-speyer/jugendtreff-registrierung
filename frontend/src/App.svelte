@@ -322,10 +322,6 @@
         />
     </div>
     <TheNavigationDrawer
-            on:eventclick={e => {
-              expandedEventIndex = events.findIndex(ev => ev.event_id === e.detail.eventId);
-              showDrawer = false;
-            }}
             on:adminclick={() => handleAdminClick()}
             on:new={() => {currentEventId = -1; showEventEditDialog = true}}
             events={events}
