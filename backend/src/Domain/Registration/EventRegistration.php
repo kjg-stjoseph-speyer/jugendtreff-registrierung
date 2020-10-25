@@ -215,4 +215,10 @@ class EventRegistration implements JsonSerializable
             'waiting' => $this->isWaiting
         ];
     }
+
+    public function dump() {
+        return "[id=" . $this->id . ", eventId=" . $this->eventId . ", userId=" . $this->userId . ", name='" . $this->name
+            . "', email='" .$this->email . "', time=" .$this->time . ", isWaiting=" . ($this->isWaiting ? "true" : "false") . ", registrationTime="
+            . $this->registrationTime . "]";
+    }
 }

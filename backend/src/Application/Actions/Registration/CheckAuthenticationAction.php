@@ -14,6 +14,9 @@ class CheckAuthenticationAction extends EventAction
     protected function action(): Response
     {
         $body = $this->request->getParsedBody();
+
+        $this->logger->info("Check authentication: '" . $body['key'] . "' (valid: '" . $this->settings['admin_key'] . "')");
+
         if (strcmp($body['key'], $this->settings['admin_key']) == 0) {
             // valid
             return $this->respondWithData(['valid' => true]);

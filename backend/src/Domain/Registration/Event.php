@@ -140,4 +140,8 @@ class Event implements JsonSerializable
             'registrations' => $this->registrations
         ];
     }
+
+    public function dump() {
+        return "[id=" . $this->id . ", time=" . $this->time . ", inCharge='" . $this->inCharge . "', maxParticipants=" . $this->maxParticipants . "]";
+    }
 }

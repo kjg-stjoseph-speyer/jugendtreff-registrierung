@@ -72,6 +72,8 @@ class MySqlEventRepository implements EventRepository
         $e = $this->eventFromDbRow($row);
         $e->setRegistrations([]);
 
+        $this->logger->info("Created event: " . $e->dump());
+
         return $e;
     }
 
@@ -88,13 +90,16 @@ class MySqlEventRepository implements EventRepository
         // notify participants about update
         MailHelper::sendEventUpdateMail($this->settings['notification_email'], $beforeUpdate, $e);
 
+        $this->logger->info("Updated event to: " . $e->dump());
+
         return $e;
     }
 
     public function deleteEvent(int $id): void
     {
         // notify participants about event deletion
-        MailHelper::sendEventDeleteMail($this->settings['notification_email'], $this->fetchEventById($id));
+        $eventToDelete = $this->fetchEventById($id);
+        MailHelper::sendEventDeleteMail($this->settings['notification_email'], $eventToDelete);
 
         // delete all registrations
         $stmt = $this->pdo->prepare("DELETE FROM registrations WHERE event_id=?");
@@ -103,6 +108,8 @@ class MySqlEventRepository implements EventRepository
         // delete event
         $stmt = $this->pdo->prepare("DELETE FROM events WHERE id=?");
         $stmt->execute([$id]);
+
+        $this->logger->info("Deleted event: " . $eventToDelete->dump());
     }
 
     public function eventExists(int $id): bool
@@ -130,7 +137,11 @@ class MySqlEventRepository implements EventRepository
         // get last inserted row
         $stmt = $this->pdo->query('SELECT * FROM registrations ORDER BY id DESC LIMIT 1');
         $row = $stmt->fetch();
-        return $this->registrationFromDbRow($row);
+        $reg = $this->registrationFromDbRow($row);
+
+        $this->logger->info("Created registration: " . $reg->dump());
+
+        return $reg;
     }
 
     public function updateRegistration(int $id, EventRegistration $registrationUpdate): EventRegistration
@@ -148,6 +159,8 @@ class MySqlEventRepository implements EventRepository
         MailHelper::sendWaitingChangedMail($this->settings['notification_email'], $updatedReg,
             $this->fetchEventById($updatedReg->getEventId()));
 
+        $this->logger->info("Updated registration: " . $updatedReg->dump());
+
         return $updatedReg;
     }
 
@@ -163,6 +176,8 @@ class MySqlEventRepository implements EventRepository
         $stmt = $this->pdo->prepare('DELETE FROM registrations WHERE id=?');
         $stmt->execute([$id]);
 
+        $this->logger->info("Deleted registration: " . $oldReg->dump());
+
         if (!$oldReg->isWaiting()){
             // get next participant that is on waiting list for this event
             $stmt = $this->pdo->prepare('SELECT * FROM registrations WHERE event_id=? AND waiting=1 ORDER BY registration_time ASC LIMIT 1');
@@ -171,10 +186,11 @@ class MySqlEventRepository implements EventRepository
 
             if ($stmt->rowCount() > 0) {
                 // there is someone waiting
-                $this->logger->debug("2");
                 $newReg = $this->registrationFromDbRow($stmt->fetch());
                 $newReg->setIsWaiting(false);
                 $this->updateRegistration($newReg->getId(), $newReg);
+
+                $this->logger->info("Move registration from waiting list: " . $newReg->dump());
             }
 
         }
