@@ -18,15 +18,17 @@
         <CardText>
             {text} <br>
 
-            <ExpansionPanels class="mt-5" accordion flat>
-                <ExpansionPanel>
-                    <span slot="header">
-                        Details
-                    </span>
+            {#if error !== null}
+                <ExpansionPanels class="mt-5" accordion flat>
+                    <ExpansionPanel>
+                        <span slot="header">
+                            Details
+                        </span>
 
-                    {error !== null ? JSON.stringify(error, null, 2) : ""}
-                </ExpansionPanel>
-            </ExpansionPanels>
+                        {error !== null ? JSON.stringify(error, null, 2) : ""}
+                    </ExpansionPanel>
+                </ExpansionPanels>
+            {/if}
         </CardText>
         <CardActions>
             <Button on:click={() => dispatch("close")} text>Schließen</Button>

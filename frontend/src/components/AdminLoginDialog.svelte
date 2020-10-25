@@ -16,7 +16,7 @@
         <CardText>
             Gib daś Administrator Passwort ein
 
-            <TextField class="mt-3" type={showPassword ? 'text' : 'password'} bind:value={password} hint="Das Passwort ist 123456">
+            <TextField class="mt-3" type={showPassword ? 'text' : 'password'} bind:value={password}>
                 Passwort
                 <div slot="append" on:click={() => showPassword = !showPassword}>
                     <Icon path={showPassword ? mdiEyeOff : mdiEye}/>
