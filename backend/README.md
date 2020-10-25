@@ -1,42 +1,66 @@
-# Slim Framework 4 Skeleton Application
+# Jugendtreff Registrierung REST API
 
-[![Coverage Status](https://coveralls.io/repos/github/slimphp/Slim-Skeleton/badge.svg?branch=master)](https://coveralls.io/github/slimphp/Slim-Skeleton?branch=master)
+Die REST API die Zugriff auch die in einer MySQL Datenbank gespeicherten Daten ermöglicht. Implementiert in PHP basierend auf dem Slim Framework 4.
 
-Use this skeleton application to quickly setup and start working on a new Slim Framework 4 application. This application uses the latest Slim 4 with Slim PSR-7 implementation and PHP-DI container implementation. It also uses the Monolog logger.
+## Einrichtung
+Es wird `composer` benötigt um die Abhängigkeiten zu installieren. Um die Anwendung lokal auszuführen wird außerdem `php` mit den Erweiterungen `pdo_mysql` sowie `initl` benötigt.
+Außerdem wird ein MySQL Server benötigt.
 
-This skeleton application was built for Composer. This makes setting up a new Slim Framework application quick and easy.
+Nach dem klonen des Repositories folgenden Befehl ausführen um die Abhängigkeiten zu installieren
 
-## Install the Application
-
-Run this command from the directory in which you want to install your new Slim Framework application.
-
-```bash
-composer create-project slim/slim-skeleton [my-app-name]
+```shell
+composer install
 ```
 
-Replace `[my-app-name]` with the desired directory name for your new application. You'll want to:
+Jetzt sollte die Anwendung konfiguriert werden (siehe Abschnitt Konfiguration)
 
-* Point your virtual host document root to your new application's `public/` directory.
-* Ensure `logs/` is web writable.
 
-To run the application in development, you can run these commands 
+Danach kann die Anwendung mit 
 
-```bash
-cd [my-app-name]
+```shell
 composer start
 ```
+im Entwicklungsmodes mit der lokalen `php` Installation gestartet werden. Der Standartmäßig auf Port 8000. Änderungen werden automatisch nach Speichern der Datei übernommen (ohne Neustart)
 
-Or you can use `docker-compose` to run the app with `docker`, so you can run these commands:
-```bash
-cd [my-app-name]
-docker-compose up -d
+**Hinweis:** Bei einer solchen lokalen Ausführung funktioniert das Senden von E-Mails nicht
+
+## Konfiguration
+Alle Einstellungen werden aus der Datei `app/settings.php` geladen, welche Standartmäßig nicht existiert. Im Repository mitgeliefert wird eine `app/settings.php.example` welche in `app/settings.php` umbenannt werden kann. Danach können in dieser Datei Änderungen entsprechende des zu verwendenden Systems gemacht werden.
+
+Für den Einsatz in einer Produktionsumgebung sollte `displayErrorDetails` auf false, sowie die Eigenschaft `path` des `loggers` auf den auskommentierten Teil gesetzt werden.
+
+## Deployment
+Um die Anwendung in einer Produktionsumgebung einzusetzen wird folgender Befehlt ausgeführt
+
+```shell
+composer install --no-dev --optimize-autoloader
 ```
-After that, open `http://localhost:8080` in your browser.
+Werden alle Dateien und Verzeichnisse auf den Webserver geladen.
 
-Run this command in the application directory to run the test suite
+## Datenstruktur
+Die Daten werden nach folgendem Modell in der MySQL Datenbank gespeichert.  
 
-```bash
-composer test
-```
 
-That's it! Now go build something cool.
+Tabelle `events`
+
+| Name | Typ | Bemerkung |
+|-------------------------------|------------------|----------------------------------------------|
+| id     				| int     		| Primärschlüssel, Auto-Increment  |
+| time  				| bigint    	| Unix Zeitstempel in ms		 |
+| in_charge 			| varchar(50) 	| Verantwortlicher 				 |
+| max_participants 	| int 		| 							 |
+
+Tabelle `registrations` 
+
+| Name | Typ | Bemerkung |
+|-------------------------------|------------------|-----------------------------------------------------------------------------|
+| id     				| int     		| Primärschlüssel, Auto-Increment  					|
+| event_id  			| int    		| Fremdschlüssel (`events`)		 					|
+| user_id 				| int 		| 8 Stellig 				 						|
+| name 				| varchar(25) 	| 							 					|
+| email				| text		| 												|
+| time				| bigint 		| Unix Zeitstempel in ms 							|
+| waiting 				| bit(1)		| `true` wenn auf Warteliste, `false` wenn Teilnehmer 	|
+| registration_time 		| bigint 		| Zeitpunkt der Registrierung, Unix Zeitstempel in ms 	|
+
+In der Datei `database.sql` befinden sich SQL Befehle die diese Tabellen erstellen wenn das Skript importiert wird.
