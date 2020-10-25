@@ -1,7 +1,5 @@
 import axios from 'axios';
-
-// TODO: load API base url from settings
-const API_BASE_URL = "http://localhost:8000"
+import {API_BASE_URL} from "../config";
 
 const eventAxios = axios.create({
   baseURL: API_BASE_URL,
