@@ -12,6 +12,7 @@
   import InfoDialog from "./components/InfoDialog.svelte";
   import * as api from './api/EventApi';
   import ErrorDialog from "./components/ErrorDialog.svelte";
+  import LoadingOverlay from "./components/LoadingOverlay.svelte";
 
   let events = [];
 
@@ -26,6 +27,9 @@
 
   // error dialog
   let error = {show: false, title: "", message: "", error: null};
+
+  // loading overlay
+  let loading = false;
 
   const eventById = eventId => {
     return events.find(e => e.event_id === eventId);
@@ -65,7 +69,7 @@
         user_id: userinfo.userid, event_id: info.eventId, waiting: isWaiting
       }
 
-      // TODO: show loading overlay
+      loading = true;
       api.createRegistration(registration)
         .then(data => {
           eventToUpdate.registrations = [...eventToUpdate.registrations,
@@ -83,6 +87,9 @@
             error: e,
             show: true,
           }
+        })
+        .finally(() => {
+          loading = false;
         });
 
 
@@ -104,7 +111,7 @@
     // get registration id
     const regId = eventToUpdate.registrations.filter(p => p.user_id === info.userId)[0].registration_id;
 
-    // TODO: show loading overlay
+    loading = true;
     api.deleteRegistration(regId)
       .then(() => {
         eventToUpdate.registrations = eventToUpdate.registrations.filter(p => p.user_id !== info.userId);
@@ -120,6 +127,9 @@
           error: e,
           show: true,
         }
+      })
+      .finally(() => {
+        loading = false;
       });
   };
 
@@ -138,13 +148,13 @@
 
   // admin event handlers
   const handleAdminLogin = password => {
-    // TODO: show loading overlay
+    loading = true;
     api.checkAuthentication(password)
       .then(resp => {
         if (resp.valid === true) {
           writeCookie("admin", password, 365);
           admin = true;
-        }else {
+        } else {
           error = {
             title: "Anmeldung Fehlgeschlagen",
             message: "Ungültiges Passwort",
@@ -163,12 +173,13 @@
       })
       .finally(() => {
         showAdminDialog = false;
+        loading = false;
       });
   };
   const handleDeleteEvent = eventId => {
     const adminKey = readCookie("admin");
 
-    // TODO: show loading overlay
+    loading = true;
     api.deleteEvent(eventId, adminKey)
       .then(() => {
         // remove locally
@@ -181,14 +192,20 @@
           error: e,
           show: true,
         }
+      })
+      .finally(() => {
+        loading = false;
       });
   };
   const handleEditEvent = update => {
     showEventEditDialog = false;
 
     const adminKey = readCookie("admin");
+
+    loading = true;
     if (update.hasOwnProperty("event_id")) {
-      // TODO:show loading overlay
+      // update event
+
       api.updateEvent(update, adminKey)
         .then(data => {
           // update locally
@@ -203,11 +220,13 @@
             error: e,
             show: true,
           }
+        })
+        .finally(() => {
+          loading = false;
         });
     } else {
-      // new event
+      // create event
 
-      // TODO: show loading overlay
       api.createEvent(update, adminKey)
         .then(data => {
           // insert locally
@@ -220,6 +239,9 @@
             error: e,
             show: true,
           }
+        })
+        .finally(() => {
+          loading = false;
         });
     }
   };
@@ -230,7 +252,7 @@
     // get registration id
     const regId = eventToUpdate.registrations.filter(p => p.user_id === userId).registration_id;
 
-    // TODO: show loading overlay
+    loading = true;
     api.deleteRegistration(regId)
       .then(() => {
         eventToUpdate.registrations = eventToUpdate.registrations.filter(p => p.user_id !== userId);
@@ -246,6 +268,9 @@
           error: e,
           show: true,
         }
+      })
+      .finally(() => {
+        loading = false;
       });
   };
 
@@ -260,7 +285,7 @@
     const updatedRegistration = eventToUpdate.registrations[userIndex];
     updatedRegistration.waiting = !updatedRegistration.waiting;
 
-    // TODO: show loading overlay
+    loading = true;
     api.updateRegistration(updatedRegistration)
       .then(data => {
         eventToUpdate.registrations[userIndex] = data;
@@ -276,6 +301,9 @@
           error: e,
           show: true,
         }
+      })
+      .finally(() => {
+        loading = false;
       });
   };
 
@@ -284,6 +312,7 @@
     admin = readCookie("admin") !== "";
 
     // fetch events using API
+    loading = true;
     api.fetchAllEvents()
       .then(data => {
         events = data;
@@ -295,6 +324,9 @@
           error: e,
           show: true,
         }
+      })
+      .finally(() => {
+        loading = false;
       });
   });
 </script>
@@ -341,6 +373,7 @@
             error={error.error}
             show={error.show} on:close={() => error.show = false}
     />
+    <LoadingOverlay show={loading} />
     {#if admin}
         <EventEditDialog
             show={showEventEditDialog}
