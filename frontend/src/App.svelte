@@ -11,6 +11,7 @@
   import EventEditDialog from "./components/EventEditDialog.svelte";
   import InfoDialog from "./components/InfoDialog.svelte";
   import * as api from './api/EventApi';
+  import ErrorDialog from "./components/ErrorDialog.svelte";
 
   let events = [];
 
@@ -22,6 +23,9 @@
   let showDrawer = false;
   let expandedEventIndex = 0;
   let currentEventId = -1;
+
+  // error dialog
+  let error = {show: false, title: "", message: "", error: null};
 
   const eventById = eventId => {
     return events.find(e => e.event_id === eventId);
@@ -56,8 +60,10 @@
     // check for duplicate name
     if (!eventToUpdate.registrations.find(p => p.name === info.name)) {
 
-      const registration = {name: info.name, email: userinfo.email, time: info.time.getTime(),
-        user_id: userinfo.userid, event_id: info.eventId, waiting: isWaiting}
+      const registration = {
+        name: info.name, email: userinfo.email, time: info.time.getTime(),
+        user_id: userinfo.userid, event_id: info.eventId, waiting: isWaiting
+      }
 
       // TODO: show loading overlay
       api.createRegistration(registration)
@@ -71,13 +77,22 @@
           events = events;
         })
         .catch(e => {
-          // TODO: show error dialog
+          error = {
+            title: "Registrierung Fehlgeschlagen",
+            message: "Die Registrierung ist Fehlgeschlagen",
+            error: e,
+            show: true,
+          }
         });
 
 
     } else {
-      // TODO: show error dialog
-      console.log("Duplicate")
+      error = {
+        title: "Name existiert bereits",
+        message: "Es ist bereits jemand mit diesem Namen angemeldet. Wähle einen anderen",
+        error: null,
+        show: true,
+      }
     }
 
   };
@@ -99,7 +114,12 @@
         events = events;
       })
       .catch(e => {
-        // TODO: show error dialog
+        error = {
+          title: "Abmelden fehlgeschlagen",
+          message: "Du konntest nicht abgemeldet werden",
+          error: e,
+          show: true,
+        }
       });
   };
 
@@ -124,10 +144,22 @@
         if (resp.valid === true) {
           writeCookie("admin", password, 365);
           admin = true;
+        }else {
+          error = {
+            title: "Anmeldung Fehlgeschlagen",
+            message: "Ungültiges Passwort",
+            error: null,
+            show: true,
+          }
         }
       })
       .catch(e => {
-        // TODO: show invalid credential dialog
+        error = {
+          title: "Anmeldung Fehlgeschlagen",
+          message: "Die Anmeldung ist fehlgeschlagen",
+          error: e,
+          show: true,
+        }
       })
       .finally(() => {
         showAdminDialog = false;
@@ -142,8 +174,13 @@
         // remove locally
         events = events.filter(e => e.event_id !== eventId)
       })
-      .catch(() => {
-        // TODO: show error dialog
+      .catch(e => {
+        error = {
+          title: "Löschen Fehlgeschlagen",
+          message: "Das Löschen des Termins ist fehlgeschlagen",
+          error: e,
+          show: true,
+        }
       });
   };
   const handleEditEvent = update => {
@@ -160,7 +197,12 @@
           events = events;
         })
         .catch(e => {
-          // TODO: show error dialog
+          error = {
+            title: "Bearbeiten Fehlgeschlagen",
+            message: "Das Bearbeiten des Termins ist fehlgeschlagen",
+            error: e,
+            show: true,
+          }
         });
     } else {
       // new event
@@ -172,7 +214,12 @@
           events = [...events, data];
         })
         .catch(e => {
-          // TODO: show error dialog
+          error = {
+            title: "Erstellen Fehlgeschlagen",
+            message: "Das Erstellen des Termins ist fehlgeschlagen",
+            error: e,
+            show: true,
+          }
         });
     }
   };
@@ -193,7 +240,12 @@
         events = events;
       })
       .catch(e => {
-        // TODO: show error dialog
+        error = {
+          title: "Löschen Fehlgeschlagen",
+          message: "Das Löschen der Registrierung ist fehlgeschlagen",
+          error: e,
+          show: true,
+        }
       });
   };
 
@@ -218,7 +270,12 @@
         events = events;
       })
       .catch(e => {
-        // TODO: show error dialog
+        error = {
+          title: "Aktualisierung Fehlgeschlagen",
+          message: "Die Aktualisierung des Registrierungsstatus ist fehlgeschlagen",
+          error: e,
+          show: true,
+        }
       });
   };
 
@@ -232,7 +289,12 @@
         events = data;
       })
       .catch(e => {
-        // TODO: show error dialog
+        error = {
+          title: "Fehler",
+          message: "Termine konnten nicht geladen werden",
+          error: e,
+          show: true,
+        }
       });
   });
 </script>
@@ -277,6 +339,12 @@
             on:login={e => handleAdminLogin(e.detail.password)}
     />
     <InfoDialog show={showInfoDialog} on:close={() => showInfoDialog = false}/>
+    <ErrorDialog
+            title={error.title}
+            text={error.message}
+            error={error.error}
+            show={error.show} on:close={() => error.show = false}
+    />
     {#if admin}
         <EventEditDialog
             show={showEventEditDialog}
