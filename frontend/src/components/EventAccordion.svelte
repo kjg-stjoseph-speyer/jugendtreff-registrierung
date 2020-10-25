@@ -33,9 +33,9 @@
   let showConfirmUserToggle = false;
 
   const handleRegisterClick = (event) => {
-    if (!isUserRegistered(event.participants, userinfo.name)) {
+    if (!isUserRegistered(event.registrations, userinfo.name)) {
       // register user
-      currentEventId = event.id;
+      currentEventId = event.event_id;
       registerEventName = formatDateTime(event.time);
       registerEventTime = new Date(event.time);
       registerDialogVisible = true;
@@ -54,13 +54,13 @@
   };
   const deregisterUser = event => {
     dispatch("deregister", {
-      eventId: event.id,
+      eventId: event.event_id,
       userId: userinfo.userid
     })
   }
 
   const isUserRegistered = (participants) => {
-    return participants.find(p => p.userid === userinfo.userid) !== undefined;
+    return participants.find(p => p.user_id === userinfo.userid) !== undefined;
   }
 
   let userinfo = {name: "", email: ""};
@@ -94,14 +94,14 @@
         on:save={registerUser}
 />
 <ExpansionPanels accordion bind:value={accordionShow}>
-    {#each events as event (event.id)}
+    {#each events as event (event.event_id)}
         <ExpansionPanel>
             <div slot="header" class="d-flex flex-column">
                 <span class="event-header">{formatDateTime(event.time)}</span>
 
                 <div class="d-flex align-center mt-2">
                     <Icon size="16px" path={mdiAccountGroup}/>
-                    <span class="ml-2">{event.participants.length} / {event.maxParticipants}</span>
+                    <span class="ml-2">{event.registrations.length} / {event.max_participants}</span>
                 </div>
             </div>
             <div class="d-flex flex-column" style="width: 100%">
@@ -111,7 +111,7 @@
                                 style="width: 48%"
                                 class="float-left mt-1 mb-2 yellow darken-2"
                                 size="small"
-                                on:click={() => dispatch("adminedit", {eventId: event.id})}
+                                on:click={() => dispatch("adminedit", {eventId: event.event_id})}
                         >
                             Bearbeiten
                         </Button>
@@ -119,7 +119,7 @@
                                 style="width: 48%"
                                 class="float-right mt-1 mb-2 red lighten-1"
                                 size="small"
-                                on:click={() => {currentEventId = event.id; showConfirmEventDelete = true}}
+                                on:click={() => {currentEventId = event.event_id; showConfirmEventDelete = true}}
                         >
                             Löschen
                         </Button>
@@ -132,25 +132,25 @@
                         <Button
                                 size="small"
                                 class={
-                                    (isUserRegistered(event.participants) ?
+                                    (isUserRegistered(event.registrations) ?
                                     "mt-1 float-right red lighten-1" :
                                     "mt-1 float-right light-green lighten-2")
                                 }
                                 on:click={() => handleRegisterClick(event)}
                         >
-                            <Icon size="20px" path={isUserRegistered(event.participants) ? mdiLogout : mdiAccountArrowRight} class="mr-1"/>
-                            {isUserRegistered(event.participants) ? "Abmelden" : "Registrieren"}
+                            <Icon size="20px" path={isUserRegistered(event.registrations) ? mdiLogout : mdiAccountArrowRight} class="mr-1"/>
+                            {isUserRegistered(event.registrations) ? "Abmelden" : "Registrieren"}
                         </Button>
                     {/if}
                 </div>
                 <div class="mt-3">
-                    {#if event.participants.length > 0}
+                    {#if event.registrations.length > 0}
                         <!-- list all participants -->
-                        {#each event.participants as p (p.name)}
+                        {#each event.registrations as p (p.name)}
                             {#if !p.waiting}
                                 <ParticipantChip
-                                        on:close={() => {currentUserId = p.userid; currentEventId = event.id; showConfirmUserDelete = true}}
-                                        on:click={() => {currentUserId = p.userid; currentEventId = event.id; showConfirmUserToggle = true}}
+                                        on:close={() => {currentUserId = p.user_id; currentEventId = event.event_id; showConfirmUserDelete = true}}
+                                        on:click={() => {currentUserId = p.user_id; currentEventId = event.event_id; showConfirmUserToggle = true}}
                                         allowClose={admin}
                                         participant={p}
                                 />
@@ -162,14 +162,14 @@
 
                 </div>
 
-                {#if countWaiting(event.participants) > 0}
+                {#if countWaiting(event.registrations) > 0}
                     <h6 class="heading float-left mt-3">Warteliste</h6>
                     <div class="mt-3">
-                        {#each event.participants as p (p.name)}
+                        {#each event.registrations as p (p.name)}
                             {#if p.waiting}
                                 <ParticipantChip
-                                        on:close={() => {currentUserId = p.userid; currentEventId = event.id; showConfirmUserDelete = true}}
-                                        on:click={() => {currentUserId = p.userid; currentEventId = event.id; showConfirmUserToggle = true}}
+                                        on:close={() => {currentUserId = p.user_id; currentEventId = event.event_id; showConfirmUserDelete = true}}
+                                        on:click={() => {currentUserId = p.user_id; currentEventId = event.event_id; showConfirmUserToggle = true}}
                                         allowClose={admin}
                                         participant={p}
                                 />
@@ -177,7 +177,7 @@
                         {/each}
                     </div>
                 {/if}
-                <span class="italic-text mt-6">Verantwortlicher: {event.inCharge}</span>
+                <span class="italic-text mt-6">Verantwortlicher: {event.in_charge}</span>
             </div>
         </ExpansionPanel>
     {/each}

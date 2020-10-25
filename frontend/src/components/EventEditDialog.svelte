@@ -24,13 +24,13 @@
     }
   };
 
-  let editedEvent = {maxParticipants: 15};
+  let editedEvent = {max_participants: 15};
 
   $: {
     if (event !== null && event !== undefined) {
       editedEvent = event;
     }else {
-      event = {time: new Date().getTime(), maxParticipants: 15, inCharge: ""}
+      event = {time: new Date().getTime(), max_participants: 15, in_charge: ""}
     }
   }
 
@@ -67,20 +67,20 @@
             <TextField
                 type=number
                 min={1}
-                bind:value={event.maxParticipants}
+                bind:value={event.max_participants}
             >
                 Max. Teilnehmer
             </TextField>
 
             <TextField
-                bind:value={event.inCharge}
+                bind:value={event.in_charge}
             >
                 Verantwortlicher
             </TextField>
         </CardText>
         <CardActions class="justify-end">
             <Button on:click={() => dispatch("cancel")} text>Abbrechen</Button>
-            <Button on:click={() => {editedEvent.maxParticipants = parseInt(editedEvent.maxParticipants) ;dispatch("save", editedEvent)}} text>Speichern</Button>
+            <Button on:click={() => {editedEvent.max_participants = parseInt(editedEvent.max_participants) ;dispatch("save", editedEvent)}} text>Speichern</Button>
         </CardActions>
     </Card>
 </Dialog>

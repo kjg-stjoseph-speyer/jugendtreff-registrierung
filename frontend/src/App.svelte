@@ -24,7 +24,7 @@
   let currentEventId = -1;
 
   const eventById = eventId => {
-    return events.find(e => e.id === eventId);
+    return events.find(e => e.event_id === eventId);
   }
 
   // called when user requests registration on an event
@@ -54,14 +54,14 @@
     // for now just add the changes locally
 
     // get event by id
-    const eventToUpdateIndex = events.findIndex(e => e.id === info.eventId);
+    const eventToUpdateIndex = events.findIndex(e => e.event_id === info.eventId);
     const eventToUpdate = events[eventToUpdateIndex];
-    const isWaiting = eventToUpdate.participants.length >= eventToUpdate.maxParticipants;
+    const isWaiting = eventToUpdate.registrations.length >= eventToUpdate.max_participants;
 
     // check for duplicate name
-    if (!eventToUpdate.participants.find(p => p.name === info.name)) {
-      eventToUpdate.participants = [...eventToUpdate.participants,
-        {name: info.name, timePreference: info.time, userid: userinfo.userid, waiting: isWaiting}
+    if (!eventToUpdate.registrations.find(p => p.name === info.name)) {
+      eventToUpdate.registrations = [...eventToUpdate.registrations,
+        {name: info.name, time: info.time, userid: userinfo.userid, waiting: isWaiting}
       ]
       events.splice(eventToUpdateIndex, 1, eventToUpdate);
 
@@ -79,9 +79,9 @@
     // TODO: remove registration using API
 
     // for now just remove changes locally
-    const eventToUpdateIndex = events.findIndex(e => e.id === info.eventId);
+    const eventToUpdateIndex = events.findIndex(e => e.event_id === info.eventId);
     const eventToUpdate = events[eventToUpdateIndex];
-    eventToUpdate.participants = eventToUpdate.participants.filter(p => p.userid !== info.userId);
+    eventToUpdate.registrations = eventToUpdate.registrations.filter(p => p.user_id !== info.userId);
     events.splice(eventToUpdateIndex, 1, eventToUpdate);
 
     // trigger reactivity
@@ -116,18 +116,18 @@
     // TODO: remove event using API
 
     // remove locally
-    events = events.filter(e => e.id !== eventId)
+    events = events.filter(e => e.event_id !== eventId)
   };
   const handleEditEvent = update => {
     showEventEditDialog = false;
 
-    if (update.hasOwnProperty("id")) {
+    if (update.hasOwnProperty("event_id")) {
       // updated event
       console.log("Updated event: ", update);
       // TODO: update event using API
 
       // update locally
-      const eventIndex = events.findIndex(e => e.id === update.id);
+      const eventIndex = events.findIndex(e => e.event_id === update.event_id);
       events[eventIndex] = update;
       events = events;
     } else {
@@ -137,8 +137,8 @@
       // insert locally
 
       // add missing properties
-      update.id = Math.random() * 100001;
-      update.participants = [];
+      update.event_id = Math.random() * 100001;
+      update.registrations = [];
 
       console.log("Inserted event: ", update);
 
@@ -152,9 +152,9 @@
 
     // remove locally
     // for now just remove changes locally
-    const eventToUpdateIndex = events.findIndex(e => e.id === eventId);
+    const eventToUpdateIndex = events.findIndex(e => e.event_id === eventId);
     const eventToUpdate = events[eventToUpdateIndex];
-    eventToUpdate.participants = eventToUpdate.participants.filter(p => p.userid !== userId);
+    eventToUpdate.registrations = eventToUpdate.registrations.filter(p => p.user_id !== userId);
     events.splice(eventToUpdateIndex, 1, eventToUpdate);
 
     // trigger reactivity
@@ -167,13 +167,13 @@
     // for now just update changes locally
 
     // get event
-    const eventToUpdateIndex = events.findIndex(e => e.id === eventId);
+    const eventToUpdateIndex = events.findIndex(e => e.event_id === eventId);
     const eventToUpdate = events[eventToUpdateIndex];
 
     // get user
-    const userIndex = eventToUpdate.participants.findIndex(p => p.userid === userId);
+    const userIndex = eventToUpdate.registrations.findIndex(p => p.user_id === userId);
     // toggle waiting status
-    eventToUpdate.participants[userIndex].waiting = !eventToUpdate.participants[userIndex].waiting;
+    eventToUpdate.registrations[userIndex].waiting = !eventToUpdate.registrations[userIndex].waiting;
 
     events.splice(eventToUpdateIndex, 1, eventToUpdate);
 
@@ -211,7 +211,7 @@
     </div>
     <TheNavigationDrawer
             on:eventclick={e => {
-              expandedEventIndex = events.findIndex(ev => ev.id === e.detail.eventId);
+              expandedEventIndex = events.findIndex(ev => ev.event_id === e.detail.eventId);
               showDrawer = false;
             }}
             on:adminclick={() => handleAdminClick()}

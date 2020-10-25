@@ -23,7 +23,7 @@
             <span style="font-weight: bold">Termine</span>
         </ListItem>
         {#each events as event}
-            <ListItem on:click={() => dispatch("eventclick", {eventId: event.id})}>
+            <ListItem on:click={() => dispatch("eventclick", {eventId: event.event_id})}>
             <span slot="prepend">
                 <Icon path={mdiCalendar}/>
             </span>

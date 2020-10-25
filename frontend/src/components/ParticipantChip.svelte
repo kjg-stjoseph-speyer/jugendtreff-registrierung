@@ -19,8 +19,8 @@
     <Icon path={participant.waiting ? mdiAccountClock : mdiAccountCheck} />
     <div on:click={() => dispatch("click")} class="d-flex flex-column">
         <span class="mt-2">{participant.name}</span>
-        {#if participant.timePreference > 0}
-            <span class="time mb-2" style="margin-top: -5px">Ab {formatTime(participant.timePreference)}</span>
+        {#if participant.time > 0}
+            <span class="time mb-2" style="margin-top: -5px">Ab {formatTime(participant.time)}</span>
         {/if}
     </div>
     {#if allowClose}

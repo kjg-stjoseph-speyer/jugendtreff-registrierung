@@ -206,7 +206,7 @@ class EventRegistration implements JsonSerializable
     public function jsonSerialize()
     {
         return [
-            'registrationId' => $this->id,
+            'registration_id' => $this->id,
             'event_id' => $this->eventId,
             'user_id' => $this->userId,
             'name' => $this->name,
