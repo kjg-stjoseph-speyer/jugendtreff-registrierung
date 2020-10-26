@@ -147,7 +147,14 @@ class MySqlEventRepository implements EventRepository
     public function updateRegistration(int $id, EventRegistration $registrationUpdate): EventRegistration
     {
         $stmt = $this->pdo->prepare('UPDATE registrations SET waiting=? WHERE id=?');
-        $stmt->execute([$registrationUpdate->isWaiting(), $id]);
+        $stmt->bindValue(1, $registrationUpdate->isWaiting(), PDO::PARAM_BOOL);
+        $stmt->bindValue(2, $id, PDO::PARAM_INT);
+
+        try {
+            $stmt->execute();
+        }catch (\Exception $e) {
+            $this->logger->error($e->getMessage());
+    }
 
         // get updated row
         $stmt = $this->pdo->prepare('SELECT * FROM registrations WHERE id=?');

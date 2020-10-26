@@ -250,7 +250,7 @@
     const eventToUpdate = events[eventToUpdateIndex];
 
     // get registration id
-    const regId = eventToUpdate.registrations.filter(p => p.user_id === userId).registration_id;
+    const regId = eventToUpdate.registrations.filter(p => p.user_id === userId)[0].registration_id;
 
     loading = true;
     api.deleteRegistration(regId)
@@ -284,6 +284,7 @@
 
     const updatedRegistration = eventToUpdate.registrations[userIndex];
     updatedRegistration.waiting = !updatedRegistration.waiting;
+    console.log(updatedRegistration);
 
     loading = true;
     api.updateRegistration(updatedRegistration)
