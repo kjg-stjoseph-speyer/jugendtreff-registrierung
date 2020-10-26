@@ -18,7 +18,7 @@ class UpdateRegistrationAction extends EventAction
 
         $registrationId = (int) $this->resolveArg('id');
         $registrationToUpdate = new EventRegistration($body['registration_id'], $body['event_id'], $body['user_id'],
-            $body['name'], $body['time'], $body['waiting']);
+            $body['name'], $body['email'] ?? "", $body['time'], $body['waiting']);
 
         if ($this->eventRepository->eventExists($registrationToUpdate->getEventId())) {
             $udpatedRegistration = $this->eventRepository->updateRegistration($registrationId, $registrationToUpdate);
