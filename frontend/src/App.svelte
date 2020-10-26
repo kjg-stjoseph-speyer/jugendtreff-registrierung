@@ -65,7 +65,7 @@
     if (!eventToUpdate.registrations.find(p => p.name === info.name)) {
 
       const registration = {
-        name: info.name, email: userinfo.email, time: info.time.getTime(),
+        name: info.name, email: userinfo.email, time: info.time,
         user_id: userinfo.userid, event_id: info.eventId, waiting: isWaiting
       }
 

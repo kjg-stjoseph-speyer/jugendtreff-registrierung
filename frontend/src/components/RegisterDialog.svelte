@@ -33,7 +33,7 @@
   };
 
   $: {
-    time = eventTime;
+    time = eventTime.getTime();
   }
 
  const handleSubmit = () => {
