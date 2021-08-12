@@ -47,9 +47,9 @@ class MySqlEventRepository implements EventRepository
     public function getAllActiveEvents(): array
     {
         // now + 24h
-        $timeThreshold = round(microtime(true) * 1000) + 24*60*60*1000;
+        $timeThreshold = round(microtime(true) * 1000) - 48*60*60*1000;
 
-        $stmt = $this->pdo->prepare('SELECT id FROM events WHERE time > ?');
+        $stmt = $this->pdo->prepare('SELECT id FROM events WHERE time > ?'); 
         $stmt->execute([$timeThreshold]);
 
         $events = [];
