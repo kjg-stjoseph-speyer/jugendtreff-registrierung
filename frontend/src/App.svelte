@@ -337,8 +337,8 @@
 
     <div style="overflow-y: scroll; max-height: 85vh">
         <Alert class="info-alert blue white-text ma-2" border="left" dense>
-            <h5>Hinweis</h5>
-            Bitte die <a class="white-text text-decoration-underline" on:click={() => showInfoDialog=true}>Regeln</a> durchlesen und beachten!
+            <h5>Aktualisiertes Hygienekonzept</h5>
+            Ab dem 1.12.2021 gilt ein neues Hygienekonzept. Bitte die <a class="white-text text-decoration-underline" on:click={() => showInfoDialog=true}>Regeln</a> durchlesen und beachten!
         </Alert>
 
         <h4 class="heading mt-8 ml-1 mb-1">Termine</h4>
